@@ -13,7 +13,7 @@ import (
 type Data struct {
 	Db        string
 	Dt        int
-	Formatter func(data interface{}, row *sql.Rows) interface{}
+	Formatter func(data interface{}, row map[string]interface{}) interface{}
 }
 
 type MessageDataTable struct {
@@ -107,7 +107,7 @@ func Complex(c interface {
 	return responseJSON
 }
 
-func dataOutput(columns map[int]Data, rows map[string]interface{}) []interface{} {
+func dataOutput(columns map[int]Data, rows *sql.Rows) []interface{} {
 	var out []interface{}
 
 	for rows.Next() {
