@@ -107,7 +107,7 @@ func Complex(c interface {
 	return responseJSON
 }
 
-func dataOutput(columns map[int]Data, rows *sql.Rows) []interface{} {
+func dataOutput(columns map[int]Data, rows map[string]interface{}) []interface{} {
 	var out []interface{}
 
 	for rows.Next() {
@@ -122,7 +122,7 @@ func dataOutput(columns map[int]Data, rows *sql.Rows) []interface{} {
 			db := column.Db
 			// Is there a formatter?
 			if column.Formatter != nil {
-				row[dt] = column.Formatter(fields[db], rows)
+				row[dt] = column.Formatter(fields[db], fields)
 			} else {
 				row[dt] = fields[db]
 			}

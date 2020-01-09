@@ -23,3 +23,6 @@ Example of use whit beego:
   Formatter: Function to format the returned data
 
 
+Client side and original PHP code
+<br>
+https://datatables.net/examples/data_sources/server_side
