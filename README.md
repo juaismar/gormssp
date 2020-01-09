@@ -16,3 +16,10 @@ Example of use whit beego:
     c.Data["json"] = SSP.Simple(c, model.ORM, "users", columns)
     c.ServeJSON()
   }
+
+  -In SSP.Data:-
+  Db: The name of field in DB
+  Dt: Position in the client table.
+  Formatter: Function to format the returned data
+
+
