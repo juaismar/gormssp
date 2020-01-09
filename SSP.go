@@ -10,8 +10,6 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
-type SSP struct{}
-
 type Data struct {
 	Db        string
 	Dt        int
@@ -25,7 +23,7 @@ type MessageDataTable struct {
 	Data            []interface{} `json:"data"`
 }
 
-func (ssp *SSP) Simple(c interface {
+func Simple(c interface {
 	GetString(string, ...string) string
 }, conn *gorm.DB,
 	table string,
@@ -64,7 +62,7 @@ func (ssp *SSP) Simple(c interface {
 	return responseJSON
 }
 
-func (ssp *SSP) Complex(c interface {
+func Complex(c interface {
 	GetString(string, ...string) string
 }, conn *gorm.DB, table string, columns map[int]Data,
 	whereResult []string, whereAll []string) MessageDataTable {
