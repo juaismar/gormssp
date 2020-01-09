@@ -2,40 +2,30 @@
 
 _Using Datatables pagination whit golang_
 
-##Introduction:
+### Pre-requisites 📋
 
-This is a library for use datatables pagination on client whit a golang server.
-It uses gorm (https://gorm.io/) and it's designed for be used whit beego (https://beego.me/).
+_Oviously use it in a golang project_
+_Gorm package (https://gorm.io/)(github.com/jinzhu/gorm)_
+_Beego package (https://beego.me/)(github.com/astaxie/beego)_
 
-## Comenzando 🚀
+### Installation 🔧
 
-Mira **Deployment** para conocer como desplegar el proyecto.
+_only install the package whit the next command,_
 
+```
+go get github.com/juaismar/gormssp
+```
 
+_and import whit_
 
-Documentation in progres on 09-02-2020
+```
+import ("github.com/juaismar/gormssp")
+```
 
-Example of use whit beego:
+## Author ✒️
 
-  import ("github.com/juaismar/gormssp")
-
-  func (c *User) Pagination() {
-
-    columns := make(map[int]SSP.Data)
-    columns[0] = SSP.Data{Db: "name", Dt: 0, Formatter: nil}
-    columns[1] = SSP.Data{Db: "role", Dt: 1, Formatter: nil}
-    columns[2] = SSP.Data{Db: "email", Dt: 2, Formatter: nil}
-
-    c.Data["json"] = SSP.Simple(c, model.ORM, "users", columns)
-    c.ServeJSON()
-  }
-
-  -In SSP.Data:-
-  Db: The name of field in DB
-  Dt: Position in the client table.
-  Formatter: Function to format the returned data
+* **Juan Iscar** - (https://github.com/juaismar)
 
 
-Client side and original PHP code
-<br>
-https://datatables.net/examples/data_sources/server_side
+
+_Readme.md based in https://gist.github.com/Villanuevand/6386899f70346d4580c723232524d35a_
