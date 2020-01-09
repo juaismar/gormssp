@@ -37,17 +37,17 @@ func (ssp *SSP) Simple(c interface {
 
 	// Build the SQL query string from the request
 	rows, err := conn.Select("*").
-		Scopes(ssp.limit(c), ssp.filter(c, columns), ssp.order(c, columns)).
+		Scopes(limit(c), filter(c, columns), order(c, columns)).
 		Table(table).
 		Rows()
 
 	check(err)
 
-	Datas := ssp.dataOutput(columns, rows)
+	Datas := dataOutput(columns, rows)
 
 	//search in DDBB recordsFiltered
 	var recordsFiltered int
-	conn.Scopes(ssp.filter(c, columns)).Table(table).Count(&recordsFiltered)
+	conn.Scopes(filter(c, columns)).Table(table).Count(&recordsFiltered)
 
 	//search in DDBB recordsTotal
 	var recordsTotal int
@@ -77,18 +77,18 @@ func (ssp *SSP) Complex(c interface {
 	whereAllFlated := flated(whereAll)
 
 	rows, err := conn.Select("*").
-		Scopes(ssp.limit(c), ssp.filter(c, columns), ssp.order(c, columns)).
+		Scopes(limit(c), filter(c, columns), order(c, columns)).
 		Where(whereResultFlated).
 		Where(whereAllFlated).
 		Table(table).
 		Rows()
 
 	check(err)
-	Datas := ssp.dataOutput(columns, rows)
+	Datas := dataOutput(columns, rows)
 
 	//search in DDBB recordsFiltered
 	var recordsFiltered int
-	conn.Scopes(ssp.filter(c, columns)).
+	conn.Scopes(filter(c, columns)).
 		Where(whereResultFlated).
 		Where(whereAllFlated).
 		Table(table).
@@ -109,7 +109,7 @@ func (ssp *SSP) Complex(c interface {
 	return responseJSON
 }
 
-func (ssp *SSP) dataOutput(columns map[int]Data, rows *sql.Rows) []interface{} {
+func dataOutput(columns map[int]Data, rows *sql.Rows) []interface{} {
 	var out []interface{}
 
 	for rows.Next() {
@@ -146,7 +146,7 @@ func flated(whereArray []string) string {
 }
 
 //database func
-func (ssp *SSP) filter(c interface {
+func filter(c interface {
 	GetString(string, ...string) string
 }, columns map[int]Data) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
@@ -220,7 +220,7 @@ func (ssp *SSP) filter(c interface {
 	}
 }
 
-func (ssp *SSP) order(c interface {
+func order(c interface {
 	GetString(string, ...string) string
 }, columns map[int]Data) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
@@ -262,7 +262,7 @@ func (ssp *SSP) order(c interface {
 	}
 }
 
-func (ssp *SSP) limit(c interface {
+func limit(c interface {
 	GetString(string, ...string) string
 }) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
