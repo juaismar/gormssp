@@ -303,9 +303,6 @@ func search(column map[int]Data, keyColumnsI string) int {
 // https://github.com/jinzhu/gorm/issues/1167
 func getFields(rows *sql.Rows) map[string]interface{} {
 
-	columnsTypes, err := rows.ColumnTypes()
-	check(err)
-
 	columns, err := rows.Columns()
 	check(err)
 
@@ -318,7 +315,6 @@ func getFields(rows *sql.Rows) map[string]interface{} {
 	value := make(map[string]interface{})
 	for i := 0; i < length; i++ {
 		key := columns[i]
-		fmt.Printf("columnsTypes %v\n", columnsTypes[i].DatabaseTypeName())
 		val := *(current[i]).(*interface{})
 		if val == nil {
 			value[key] = nil
@@ -334,13 +330,13 @@ func getFields(rows *sql.Rows) map[string]interface{} {
 			value[key] = val.(time.Time)
 		case "[]uint8":
 			value[key] = string(val.([]uint8))
-		default:
-			fmt.Printf("unsupport data type '%s' now\n", vType)
+			// default:
+			// fmt.Printf("unsupport data type '%s' now\n", vType)
 			// TODO remember add other data type
 		}
 
 	}
-	return make(map[string]interface{}) //value
+	return value
 }
 
 func makeResultReceiver(length int) []interface{} {
