@@ -1,5 +1,18 @@
 # gormssp
 
+_Using Datatables pagination whit golang_
+
+##Introduction:
+
+This is a library for use datatables pagination on client whit a golang server.
+It uses gorm (https://gorm.io/) and it's designed for be used whit beego (https://beego.me/).
+
+## Comenzando 🚀
+
+Mira **Deployment** para conocer como desplegar el proyecto.
+
+
+
 Documentation in progres on 09-02-2020
 
 Example of use whit beego:
