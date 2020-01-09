@@ -4,9 +4,9 @@ _Using Datatables pagination with golang_
 
 ### Pre-requisites 📋
 
-_Oviously use it in a golang project_
-_Gorm package (https://gorm.io/)(github.com/jinzhu/gorm)_
-_Beego package (https://beego.me/)(github.com/astaxie/beego)_
+* Oviously use it in a golang project
+* Gorm package (https://gorm.io/)(github.com/jinzhu/gorm)
+* Beego package (https://beego.me/)(github.com/astaxie/beego)
 
 ### Installation 🔧
 
@@ -29,15 +29,23 @@ import ("github.com/juaismar/gormssp")
 
 func (c *User) Pagination() {
 
+  // Array of database columns which should be read and sent back to DataTables.
+  // The `db` parameter represents the column name in the database, while the `dt`
+  // parameter represents the DataTables column identifier. In this case simple
+  // indexes
+  // Formatter is a function to customize the value of field , can be nil.
   columns := make(map[int]SSP.Data)
   columns[0] = SSP.Data{Db: "name", Dt: 0, Formatter: nil}
   columns[1] = SSP.Data{Db: "role", Dt: 1, Formatter: nil}
   columns[2] = SSP.Data{Db: "email", Dt: 2, Formatter: nil}
 
+  // Send the data to the client
   c.Data["json"] = SSP.Simple(c, model.ORM, "users", columns)
   c.ServeJSON()
 }
 ```
+
+-This project is based in the PHP version of datatables pagination in https://datatables.net/examples/data_sources/server_side -
 
 ## Author ✒️
 
