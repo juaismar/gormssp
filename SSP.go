@@ -12,7 +12,7 @@ import (
 
 type Data struct {
 	Db        string
-	Dt        int
+	Dt        interface{}
 	Formatter func(data interface{}, row map[string]interface{}) interface{}
 }
 
@@ -34,7 +34,7 @@ func Simple(c interface {
 	draw, err := strconv.Atoi(c.GetString("draw"))
 
 	// Build the SQL query string from the request
-	rows, err := conn.Select("*").
+	rows, err := conn.Debug().Select("*").
 		Scopes(limit(c), filter(c, columns), order(c, columns)).
 		Table(table).
 		Rows()
@@ -111,14 +111,23 @@ func dataOutput(columns map[int]Data, rows *sql.Rows) []interface{} {
 	var out []interface{}
 
 	for rows.Next() {
-		var row map[int]interface{}
 		fields := getFields(rows)
 
-		row = make(map[int]interface{})
+		//row = make(map[interface{}]interface{})
+		row := make(map[string]interface{})
 		var j = 0
 		for j = 0; j < len(columns); j++ {
 			column := columns[j]
-			dt := column.Dt
+			var dt string //:= column.Dt
+
+			//TODO? return a interface (int / string)
+			vType := reflect.TypeOf(column.Dt)
+			if vType.String() == "string" {
+				dt = column.Dt.(string)
+			} else {
+				dt = strconv.Itoa(column.Dt.(int))
+			}
+
 			db := column.Db
 			// Is there a formatter?
 			if column.Formatter != nil {
@@ -126,6 +135,7 @@ func dataOutput(columns map[int]Data, rows *sql.Rows) []interface{} {
 			} else {
 				row[dt] = fields[db]
 			}
+
 		}
 		out = append(out, row)
 	}
@@ -291,7 +301,16 @@ func search(column map[int]Data, keyColumnsI string) int {
 	var i int
 	for i = 0; i < len(column); i++ {
 		data := column[i]
-		if strconv.Itoa(data.Dt) == keyColumnsI {
+
+		var field string
+		vType := reflect.TypeOf(data.Dt)
+		if vType.String() == "string" {
+			field = data.Dt.(string)
+		} else {
+			field = strconv.Itoa(data.Dt.(int))
+		}
+
+		if field == keyColumnsI {
 			return i
 		}
 	}
@@ -328,9 +347,10 @@ func getFields(rows *sql.Rows) map[string]interface{} {
 			value[key] = val.(time.Time)
 		case "[]uint8":
 			value[key] = string(val.([]uint8))
-			// default:
-			// fmt.Printf("unsupport data type '%s' now\n", vType)
-			// TODO remember add other data type
+		case "bool":
+			value[key] = val.(bool)
+		default:
+			value[key] = val
 		}
 
 	}
