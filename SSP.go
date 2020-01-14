@@ -247,23 +247,24 @@ func order(c interface {
 				requestColumnData := c.GetString(columnIdxTittle)
 				columnIdx := search(columns, requestColumnData)
 
-				column := columns[columnIdx]
+				if columnIdx > -1 {
+					column := columns[columnIdx]
 
-				columnIdxTittle = fmt.Sprintf("columns[%s][orderable]", columnIdxOrder)
-				if c.GetString(columnIdxTittle) == "true" {
+					columnIdxTittle = fmt.Sprintf("columns[%s][orderable]", columnIdxOrder)
+					if c.GetString(columnIdxTittle) == "true" {
 
-					columnIdxTittle = fmt.Sprintf("order[%d][dir]", i)
-					requestColumnData = c.GetString(columnIdxTittle)
+						columnIdxTittle = fmt.Sprintf("order[%d][dir]", i)
+						requestColumnData = c.GetString(columnIdxTittle)
 
-					order := "desc"
-					if requestColumnData == "asc" {
-						order = "asc"
+						order := "desc"
+						if requestColumnData == "asc" {
+							order = "asc"
+						}
+
+						query := fmt.Sprintf("%s %s", column.Db, order)
+						db = db.Order(query)
 					}
-
-					query := fmt.Sprintf("%s %s", column.Db, order)
-					db = db.Order(query)
 				}
-
 			}
 		}
 		return db
