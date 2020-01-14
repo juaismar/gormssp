@@ -34,7 +34,7 @@ func Simple(c interface {
 	draw, err := strconv.Atoi(c.GetString("draw"))
 
 	// Build the SQL query string from the request
-	rows, err := conn.Debug().Select("*").
+	rows, err := conn.Select("*").
 		Scopes(limit(c), filter(c, columns), order(c, columns)).
 		Table(table).
 		Rows()
