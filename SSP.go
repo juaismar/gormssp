@@ -36,7 +36,7 @@ func Simple(c interface {
 	columnsType := initBinding(conn, table)
 
 	// Build the SQL query string from the request
-	rows, err := conn.Debug().Select("*").
+	rows, err := conn.Select("*").
 		Scopes(limit(c), filter(c, columns, columnsType), order(c, columns)).
 		Table(table).
 		Rows()
@@ -404,7 +404,7 @@ func makeResultReceiver(length int) []interface{} {
 }
 
 func initBinding(db *gorm.DB, table string) []*sql.ColumnType {
-	rows, err := db.Debug().Select("*").
+	rows, err := db.Select("*").
 		Table(table).
 		Limit(0).
 		Rows()
