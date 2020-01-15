@@ -33,9 +33,11 @@ func Simple(c interface {
 	draw := 0
 	draw, err := strconv.Atoi(c.GetString("draw"))
 
+	columnsType := initBinding(conn, table)
+
 	// Build the SQL query string from the request
-	rows, err := conn.Select("*").
-		Scopes(limit(c), filter(c, columns), order(c, columns)).
+	rows, err := conn.Debug().Select("*").
+		Scopes(limit(c), filter(c, columns, columnsType), order(c, columns)).
 		Table(table).
 		Rows()
 
@@ -45,7 +47,7 @@ func Simple(c interface {
 
 	//search in DDBB recordsFiltered
 	var recordsFiltered int
-	conn.Scopes(filter(c, columns)).Table(table).Count(&recordsFiltered)
+	conn.Scopes(filter(c, columns, columnsType)).Table(table).Count(&recordsFiltered)
 
 	//search in DDBB recordsTotal
 	var recordsTotal int
@@ -70,12 +72,14 @@ func Complex(c interface {
 	draw := 0
 	draw, err := strconv.Atoi(c.GetString("draw"))
 
+	columnsType := initBinding(conn, table)
+
 	// Build the SQL query string from the request
 	whereResultFlated := flated(whereResult)
 	whereAllFlated := flated(whereAll)
 
 	rows, err := conn.Select("*").
-		Scopes(limit(c), filter(c, columns), order(c, columns)).
+		Scopes(limit(c), filter(c, columns, columnsType), order(c, columns)).
 		Where(whereResultFlated).
 		Where(whereAllFlated).
 		Table(table).
@@ -86,7 +90,7 @@ func Complex(c interface {
 
 	//search in DDBB recordsFiltered
 	var recordsFiltered int
-	conn.Scopes(filter(c, columns)).
+	conn.Scopes(filter(c, columns, columnsType)).
 		Where(whereResultFlated).
 		Where(whereAllFlated).
 		Table(table).
@@ -156,7 +160,7 @@ func flated(whereArray []string) string {
 //database func
 func filter(c interface {
 	GetString(string, ...string) string
-}, columns map[int]Data) func(db *gorm.DB) *gorm.DB {
+}, columns map[int]Data, columnsType []*sql.ColumnType) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 
 		globalSearch := ""
@@ -171,26 +175,27 @@ func filter(c interface {
 				if keyColumnsData == "" {
 					break
 				}
-
 				columnIdx := search(columns, keyColumnsData)
-				if columnIdx > -1 {
 
+				requestColumnQuery := fmt.Sprintf("columns[%d][searchable]", i)
+				requestColumn := c.GetString(requestColumnQuery)
+
+				if columnIdx > -1 && requestColumn == "true" {
 					column := columns[columnIdx]
+					value := "%" + str + "%"
+					columndb := column.Db
 
-					requestColumnQuery := fmt.Sprintf("columns[%d][searchable]", i)
-					requestColumn := c.GetString(requestColumnQuery)
+					query := bindingTypes("%s LIKE '%s'", columndb, value, columnsType)
 
-					if requestColumn == "true" {
-						binding := "%" + str + "%"
-						columndb := column.Db
-
-						if globalSearch != "" {
-							globalSearch += " OR "
-						}
-						globalSearch += fmt.Sprintf("%s LIKE '%s'", columndb, binding)
+					if globalSearch != "" && query != "" {
+						globalSearch += " OR "
 					}
+
+					globalSearch += query
 				} else {
-					fmt.Printf("Column %s not found\n", keyColumnsData)
+					if columnIdx < 0 && requestColumn == "true" {
+						fmt.Printf("Do you forgot searchable: false in column %v ?\n", keyColumnsData)
+					}
 				}
 			}
 		}
@@ -209,27 +214,31 @@ func filter(c interface {
 			}
 
 			columnIdx := search(columns, keyColumnsData)
-			if columnIdx > -1 {
+
+			requestColumnQuery := fmt.Sprintf("columns[%d][searchable]", i)
+			requestColumn := c.GetString(requestColumnQuery)
+
+			requestColumnQuery = fmt.Sprintf("columns[%d][searchable][search][value]", i)
+			str := c.GetString(requestColumnQuery)
+
+			if columnIdx > -1 && requestColumn == "true" && str != "" {
 
 				column := columns[columnIdx]
+				value := "%" + str + "%"
+				columndb := column.Db
 
-				requestColumnQuery := fmt.Sprintf("columns[%d][searchable]", i)
-				requestColumn := c.GetString(requestColumnQuery)
+				query := bindingTypes("%s LIKE '%s'", columndb, value, columnsType)
 
-				requestColumnQuery = fmt.Sprintf("columns[%d][searchable][search][value]", i)
-				str := c.GetString(requestColumnQuery)
-
-				if requestColumn == "true" && str != "" {
-					binding := "%" + str + "%"
-					columndb := column.Db
-
-					if columnSearch != "" {
-						columnSearch += " OR "
-					}
-					columnSearch += fmt.Sprintf("%s LIKE '%s'", columndb, binding)
+				if columnSearch != "" && query != "" {
+					columnSearch += " AND "
 				}
+
+				columnSearch += query
+
 			} else {
-				fmt.Printf("Column %s not found\n", keyColumnsData)
+				if columnIdx < 0 && requestColumn == "true" {
+					fmt.Printf("Do you forgot searchable: false in column %v ?\n", keyColumnsData)
+				}
 			}
 		}
 		return db.Where(columnSearch)
@@ -254,25 +263,25 @@ func order(c interface {
 				columnIdxTittle = fmt.Sprintf("columns[%s][data]", columnIdxOrder)
 				requestColumnData := c.GetString(columnIdxTittle)
 				columnIdx := search(columns, requestColumnData)
-				if columnIdx > -1 {
+
+				columnIdxTittle = fmt.Sprintf("columns[%s][orderable]", columnIdxOrder)
+
+				if columnIdx > -1 && c.GetString(columnIdxTittle) == "true" {
+
 					column := columns[columnIdx]
+					columnIdxTittle = fmt.Sprintf("order[%d][dir]", i)
+					requestColumnData = c.GetString(columnIdxTittle)
 
-					columnIdxTittle = fmt.Sprintf("columns[%s][orderable]", columnIdxOrder)
-					if c.GetString(columnIdxTittle) == "true" {
-
-						columnIdxTittle = fmt.Sprintf("order[%d][dir]", i)
-						requestColumnData = c.GetString(columnIdxTittle)
-
-						order := "desc"
-						if requestColumnData == "asc" {
-							order = "asc"
-						}
-
-						query := fmt.Sprintf("%s %s", column.Db, order)
-						db = db.Order(query)
+					order := "desc"
+					if requestColumnData == "asc" {
+						order = "asc"
 					}
+					query := fmt.Sprintf("%s %s", column.Db, order)
+					db = db.Order(query)
 				} else {
-					fmt.Printf("Column %s not found\n", requestColumnData)
+					if columnIdx < 0 && c.GetString(columnIdxTittle) == "true" {
+						fmt.Printf("Do you forgot orderable: false in column %v ?\n", columnIdxOrder)
+					}
 				}
 			}
 		}
@@ -327,6 +336,23 @@ func search(column map[int]Data, keyColumnsI string) int {
 	return -1
 }
 
+//check if searchable field is string
+func bindingTypes(query string, columndb string, value string, columnsType []*sql.ColumnType) string {
+
+	for _, element := range columnsType {
+		if element.Name() == columndb {
+
+			if element.ScanType().String() == "string" {
+				return fmt.Sprintf(query, columndb, value)
+			} else {
+				return ""
+			}
+		}
+	}
+
+	return ""
+}
+
 // https://github.com/jinzhu/gorm/issues/1167
 func getFields(rows *sql.Rows) map[string]interface{} {
 
@@ -375,4 +401,17 @@ func makeResultReceiver(length int) []interface{} {
 		result = append(result, &current)
 	}
 	return result
+}
+
+func initBinding(db *gorm.DB, table string) []*sql.ColumnType {
+	rows, err := db.Debug().Select("*").
+		Table(table).
+		Limit(0).
+		Rows()
+
+	columnsType, err := rows.ColumnTypes()
+	check(err)
+
+	defer rows.Close()
+	return columnsType
 }
