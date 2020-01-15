@@ -173,20 +173,24 @@ func filter(c interface {
 				}
 
 				columnIdx := search(columns, keyColumnsData)
+				if columnIdx > -1 {
 
-				column := columns[columnIdx]
+					column := columns[columnIdx]
 
-				requestColumnQuery := fmt.Sprintf("columns[%d][searchable]", i)
-				requestColumn := c.GetString(requestColumnQuery)
+					requestColumnQuery := fmt.Sprintf("columns[%d][searchable]", i)
+					requestColumn := c.GetString(requestColumnQuery)
 
-				if requestColumn == "true" {
-					binding := "%" + str + "%"
-					columndb := column.Db
+					if requestColumn == "true" {
+						binding := "%" + str + "%"
+						columndb := column.Db
 
-					if globalSearch != "" {
-						globalSearch += " OR "
+						if globalSearch != "" {
+							globalSearch += " OR "
+						}
+						globalSearch += fmt.Sprintf("%s LIKE '%s'", columndb, binding)
 					}
-					globalSearch += fmt.Sprintf("%s LIKE '%s'", columndb, binding)
+				} else {
+					fmt.Printf("Column %s not found\n", keyColumnsData)
 				}
 			}
 		}
@@ -205,23 +209,27 @@ func filter(c interface {
 			}
 
 			columnIdx := search(columns, keyColumnsData)
+			if columnIdx > -1 {
 
-			column := columns[columnIdx]
+				column := columns[columnIdx]
 
-			requestColumnQuery := fmt.Sprintf("columns[%d][searchable]", i)
-			requestColumn := c.GetString(requestColumnQuery)
+				requestColumnQuery := fmt.Sprintf("columns[%d][searchable]", i)
+				requestColumn := c.GetString(requestColumnQuery)
 
-			requestColumnQuery = fmt.Sprintf("columns[%d][searchable][search][value]", i)
-			str := c.GetString(requestColumnQuery)
+				requestColumnQuery = fmt.Sprintf("columns[%d][searchable][search][value]", i)
+				str := c.GetString(requestColumnQuery)
 
-			if requestColumn == "true" && str != "" {
-				binding := "%" + str + "%"
-				columndb := column.Db
+				if requestColumn == "true" && str != "" {
+					binding := "%" + str + "%"
+					columndb := column.Db
 
-				if columnSearch != "" {
-					columnSearch += " OR "
+					if columnSearch != "" {
+						columnSearch += " OR "
+					}
+					columnSearch += fmt.Sprintf("%s LIKE '%s'", columndb, binding)
 				}
-				columnSearch += fmt.Sprintf("%s LIKE '%s'", columndb, binding)
+			} else {
+				fmt.Printf("Column %s not found\n", keyColumnsData)
 			}
 		}
 		return db.Where(columnSearch)
@@ -246,7 +254,6 @@ func order(c interface {
 				columnIdxTittle = fmt.Sprintf("columns[%s][data]", columnIdxOrder)
 				requestColumnData := c.GetString(columnIdxTittle)
 				columnIdx := search(columns, requestColumnData)
-
 				if columnIdx > -1 {
 					column := columns[columnIdx]
 
@@ -264,6 +271,8 @@ func order(c interface {
 						query := fmt.Sprintf("%s %s", column.Db, order)
 						db = db.Order(query)
 					}
+				} else {
+					fmt.Printf("Column %s not found\n", requestColumnData)
 				}
 			}
 		}
