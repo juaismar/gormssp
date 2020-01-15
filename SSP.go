@@ -128,14 +128,12 @@ func dataOutput(columns map[int]Data, rows *sql.Rows) []interface{} {
 				dt = strconv.Itoa(column.Dt.(int))
 			}
 
-			if dt != nil{
-				db := column.Db
-				// Is there a formatter?
-				if column.Formatter != nil {
-					row[dt] = column.Formatter(fields[db], fields)
-				} else {
-					row[dt] = fields[db]
-				}
+			db := column.Db
+			// Is there a formatter?
+			if column.Formatter != nil {
+				row[dt] = column.Formatter(fields[db], fields)
+			} else {
+				row[dt] = fields[db]
 			}
 
 		}
