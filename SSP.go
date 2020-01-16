@@ -218,7 +218,7 @@ func filter(c interface {
 			requestColumnQuery := fmt.Sprintf("columns[%d][searchable]", i)
 			requestColumn := c.GetString(requestColumnQuery)
 
-			requestColumnQuery = fmt.Sprintf("columns[%d][searchable][search][value]", i)
+			requestColumnQuery = fmt.Sprintf("columns[%d][search][value]", i)
 			str := c.GetString(requestColumnQuery)
 
 			if columnIdx > -1 && requestColumn == "true" && str != "" {
