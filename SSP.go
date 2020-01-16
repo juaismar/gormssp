@@ -143,6 +143,9 @@ func dataOutput(columns map[int]Data, rows *sql.Rows) []interface{} {
 		}
 		out = append(out, row)
 	}
+	if out == nil {
+		out = make([]interface{}, 0)
+	}
 	return out
 }
 
