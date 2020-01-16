@@ -58,3 +58,8 @@ func (c *User) Pagination() {
 
 
 _Readme.md based in https://gist.github.com/Villanuevand/6386899f70346d4580c723232524d35a_
+
+## Notes
+
+The search dont work prperly before Nov 08 2019, this update solve the problem
+https://go-review.googlesource.com/c/go/+/205897/

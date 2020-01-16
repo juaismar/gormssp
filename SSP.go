@@ -20,7 +20,7 @@ type MessageDataTable struct {
 	Draw            int           `json:"draw"`
 	RecordsTotal    int           `json:"recordsTotal"`
 	RecordsFiltered int           `json:"recordsFiltered"`
-	Data            []interface{} `json:"data"`
+	Data            []interface{} `json:"data,nilasempty"`
 }
 
 func Simple(c interface {
