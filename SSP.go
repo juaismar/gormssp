@@ -112,19 +112,17 @@ func Complex(c interface {
 }
 
 func dataOutput(columns map[int]Data, rows *sql.Rows) []interface{} {
-	var out []interface{}
+	out := make([]interface{}, 0)
 
 	for rows.Next() {
 		fields := getFields(rows)
 
-		//row = make(map[interface{}]interface{})
 		row := make(map[string]interface{})
 		var j = 0
 		for j = 0; j < len(columns); j++ {
 			column := columns[j]
-			var dt string //:= column.Dt
+			var dt string
 
-			//TODO? return a interface (int / string)
 			vType := reflect.TypeOf(column.Dt)
 			if vType.String() == "string" {
 				dt = column.Dt.(string)
@@ -143,9 +141,7 @@ func dataOutput(columns map[int]Data, rows *sql.Rows) []interface{} {
 		}
 		out = append(out, row)
 	}
-	if out == nil {
-		out = make([]interface{}, 0)
-	}
+
 	return out
 }
 
