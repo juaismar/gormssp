@@ -183,7 +183,7 @@ func filter(c interface {
 					column := columns[columnIdx]
 					columndb := column.Db
 
-					query := bindingTypes("%s LIKE '%s'", columndb, str, columnsType)
+					query := bindingTypes(columndb, str, columnsType)
 
 					if globalSearch != "" && query != "" {
 						globalSearch += " OR "
@@ -224,7 +224,7 @@ func filter(c interface {
 				column := columns[columnIdx]
 				columndb := column.Db
 
-				query := bindingTypes("%s LIKE '%s'", columndb, str, columnsType)
+				query := bindingTypes(columndb, str, columnsType)
 
 				if columnSearch != "" && query != "" {
 					columnSearch += " AND "
