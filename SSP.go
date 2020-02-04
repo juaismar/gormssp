@@ -181,10 +181,9 @@ func filter(c interface {
 
 				if columnIdx > -1 && requestColumn == "true" {
 					column := columns[columnIdx]
-					value := "%" + str + "%"
 					columndb := column.Db
 
-					query := bindingTypes("%s LIKE '%s'", columndb, value, columnsType)
+					query := bindingTypes("%s LIKE '%s'", columndb, str, columnsType)
 
 					if globalSearch != "" && query != "" {
 						globalSearch += " OR "
@@ -223,10 +222,9 @@ func filter(c interface {
 			if columnIdx > -1 && requestColumn == "true" && str != "" {
 
 				column := columns[columnIdx]
-				value := "%" + str + "%"
 				columndb := column.Db
 
-				query := bindingTypes("%s LIKE '%s'", columndb, value, columnsType)
+				query := bindingTypes("%s LIKE '%s'", columndb, str, columnsType)
 
 				if columnSearch != "" && query != "" {
 					columnSearch += " AND "
@@ -336,14 +334,23 @@ func search(column map[int]Data, keyColumnsI string) int {
 }
 
 //check if searchable field is string
-func bindingTypes(query string, columndb string, value string, columnsType []*sql.ColumnType) string {
+func bindingTypes(columndb string, value string, columnsType []*sql.ColumnType) string {
 
 	for _, element := range columnsType {
 		if element.Name() == columndb {
 
-			if element.ScanType().String() == "string" {
-				return fmt.Sprintf(query, columndb, value)
-			} else {
+			switch element.ScanType().String() {
+			case "string":
+				str := "%" + value + "%"
+				return fmt.Sprintf("%s LIKE '%s'", columndb, str)
+			case "int32":
+				intval, err := strconv.Atoi(value)
+				if err != nil{
+					return ""
+				}
+				return fmt.Sprintf("%s = %s", columndb, value)
+			default:
+				fmt.Printf("New type %v\n", element.ScanType().String())
 				return ""
 			}
 		}
