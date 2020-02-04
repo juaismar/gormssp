@@ -348,7 +348,7 @@ func bindingTypes(columndb string, value string, columnsType []*sql.ColumnType) 
 				if err != nil{
 					return ""
 				}
-				return fmt.Sprintf("%s = %s", columndb, intval)
+				return fmt.Sprintf("%s = %d", columndb, intval)
 			default:
 				fmt.Printf("New type %v\n", element.ScanType().String())
 				return ""
