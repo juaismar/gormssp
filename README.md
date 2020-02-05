@@ -3,7 +3,7 @@
 _Using Datatables pagination with golang_
 
 [![Build Status](https://travis-ci.org/juaismar/gormssp.svg?branch=master)](https://travis-ci.org/juaismar/gormssp)
-[![Go Report Card](https://goreportcard.com/badge/github.com/juaismar/gormssp)](https://goreportcard.com/report/github.com/juaismar/gormssp)
+
 
 ### Pre-requisites 📋
 
