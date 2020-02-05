@@ -56,7 +56,7 @@ func (c *User) Pagination() {
 
 ## Thanks 🎁
 * All my friends at work.
-* Sergio and Mario (https://github.com/mapreal19) who taught me how to program golang and showed me the wonderful world of good practices.
+* Sergio(https://github.com/serveba) and Mario (https://github.com/mapreal19) who taught me how to program golang and showed me the wonderful world of good practices.
 * Juan, Juan and Joaquin.
 
 
