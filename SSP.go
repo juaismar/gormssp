@@ -345,9 +345,7 @@ func bindingTypes(columndb string, value string, columnsType []*sql.ColumnType) 
 				return fmt.Sprintf("%s LIKE '%s'", columndb, str)
 			case "int32":
 				intval, err := strconv.Atoi(value)
-				if err != nil{
-					return ""
-				}
+				check(err)
 				return fmt.Sprintf("%s = %d", columndb, intval)
 			default:
 				fmt.Printf("New type %v\n", element.ScanType().String())
