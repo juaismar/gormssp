@@ -2,6 +2,8 @@
 
 _Using Datatables pagination with golang_
 
+[![Build Status](https://travis-ci.org/juaismar/gormssp.svg?branch=master)](https://travis-ci.org/juaismar/gormssp)
+
 ### Pre-requisites 📋
 
 * Oviously use it in a golang project
