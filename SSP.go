@@ -37,7 +37,10 @@ func Simple(c interface {
 
 	// Build the SQL query string from the request
 	rows, err := conn.Select("*").
-		Scopes(limit(c), filter(c, columns, columnsType), order(c, columns)).
+		Scopes(limit(c),
+			filterGlobal(c, columns, columnsType),
+			filterIndividual(c, columns, columnsType),
+			order(c, columns)).
 		Table(table).
 		Rows()
 
@@ -47,7 +50,10 @@ func Simple(c interface {
 
 	//search in DDBB recordsFiltered
 	var recordsFiltered int
-	conn.Scopes(filter(c, columns, columnsType)).Table(table).Count(&recordsFiltered)
+	conn.Scopes(filterGlobal(c, columns, columnsType),
+		filterIndividual(c, columns, columnsType)).
+		Table(table).
+		Count(&recordsFiltered)
 
 	//search in DDBB recordsTotal
 	var recordsTotal int
@@ -79,7 +85,10 @@ func Complex(c interface {
 	whereAllFlated := flated(whereAll)
 
 	rows, err := conn.Select("*").
-		Scopes(limit(c), filter(c, columns, columnsType), order(c, columns)).
+		Scopes(limit(c),
+			filterGlobal(c, columns, columnsType),
+			filterIndividual(c, columns, columnsType),
+			order(c, columns)).
 		Where(whereResultFlated).
 		Where(whereAllFlated).
 		Table(table).
@@ -90,7 +99,8 @@ func Complex(c interface {
 
 	//search in DDBB recordsFiltered
 	var recordsFiltered int
-	conn.Scopes(filter(c, columns, columnsType)).
+	conn.Scopes(filterGlobal(c, columns, columnsType),
+		filterIndividual(c, columns, columnsType)).
 		Where(whereResultFlated).
 		Where(whereAllFlated).
 		Table(table).
@@ -157,7 +167,7 @@ func flated(whereArray []string) string {
 }
 
 //database func
-func filter(c interface {
+func filterGlobal(c interface {
 	GetString(string, ...string) string
 }, columns map[int]Data, columnsType []*sql.ColumnType) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
@@ -197,11 +207,16 @@ func filter(c interface {
 				}
 			}
 		}
-		db = db.Where(globalSearch)
+		return db.Where(globalSearch)
+	}
+}
 
-		columnSearch := ""
-
+func filterIndividual(c interface {
+	GetString(string, ...string) string
+}, columns map[int]Data, columnsType []*sql.ColumnType) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
 		// Individual column filtering
+		columnSearch := ""
 		var i int
 		for i = 0; ; i++ {
 			keyColumnsI := fmt.Sprintf("columns[%d][data]", i)
