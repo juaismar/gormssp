@@ -32,6 +32,7 @@ func Simple(c interface {
 
 	draw := 0
 	draw, err := strconv.Atoi(c.GetString("draw"))
+	check(err)
 
 	columnsType := initBinding(conn, table)
 
@@ -77,6 +78,7 @@ func Complex(c interface {
 
 	draw := 0
 	draw, err := strconv.Atoi(c.GetString("draw"))
+	check(err)
 
 	columnsType := initBinding(conn, table)
 
@@ -128,8 +130,8 @@ func dataOutput(columns map[int]Data, rows *sql.Rows) []interface{} {
 		fields := getFields(rows)
 
 		row := make(map[string]interface{})
-		var j = 0
-		for j = 0; j < len(columns); j++ {
+
+		for j := 0; j < len(columns); j++ {
 			column := columns[j]
 			var dt string
 
@@ -427,6 +429,7 @@ func initBinding(db *gorm.DB, table string) []*sql.ColumnType {
 		Table(table).
 		Limit(0).
 		Rows()
+	check(err)
 
 	columnsType, err := rows.ColumnTypes()
 	check(err)
