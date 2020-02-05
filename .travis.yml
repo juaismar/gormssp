@@ -19,3 +19,5 @@ jobs:
     - stage: test
       script:
         - ginkgo -r --randomizeAllSpecs --randomizeSuites --failOnPending --cover --trace --race --progress
+      after_success:
+        - bash <(curl -s https://codecov.io/bash)
