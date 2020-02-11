@@ -364,6 +364,13 @@ func bindingTypes(columndb string, value string, columnsType []*sql.ColumnType) 
 				intval, err := strconv.Atoi(value)
 				check(err)
 				return fmt.Sprintf("%s = %d", columndb, intval)
+			case "bool":
+				boolval, _ := strconv.ParseBool(value)
+				queryval := "NOT"
+				if boolval {
+					queryval = ""
+				}
+				return fmt.Sprintf("%s IS %s TRUE", columndb, queryval)
 			default:
 				fmt.Printf("New type %v\n", element.ScanType().String())
 				return ""
@@ -407,6 +414,7 @@ func getFields(rows *sql.Rows) map[string]interface{} {
 		case "bool":
 			value[key] = val.(bool)
 		default:
+
 			value[key] = val
 		}
 
