@@ -11,8 +11,8 @@ import (
 )
 
 type Data struct {
-	Db        string
-	Dt        interface{}
+	Db        string      //name of column
+	Dt        interface{} //id of column in client (int or string)
 	Formatter func(data interface{}, row map[string]interface{}) interface{}
 }
 
