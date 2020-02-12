@@ -5,15 +5,17 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/jinzhu/gorm"
 )
 
 type Data struct {
-	Db        string
-	Dt        interface{}
-	Formatter func(data interface{}, row map[string]interface{}) interface{}
+	Db        string                                                         //name of column
+	Dt        interface{}                                                    //id of column in client (int or string)
+	Cs        bool                                                           //case sensitive - optional default false
+	Formatter func(data interface{}, row map[string]interface{}) interface{} // - optional
 }
 
 type MessageDataTable struct {
@@ -103,7 +105,6 @@ func Complex(c interface {
 	var recordsFiltered int
 	conn.Scopes(filterGlobal(c, columns, columnsType),
 		filterIndividual(c, columns, columnsType)).
-		Where(whereResultFlated).
 		Where(whereAllFlated).
 		Table(table).
 		Count(&recordsFiltered)
@@ -192,10 +193,7 @@ func filterGlobal(c interface {
 				requestColumn := c.GetString(requestColumnQuery)
 
 				if columnIdx > -1 && requestColumn == "true" {
-					column := columns[columnIdx]
-					columndb := column.Db
-
-					query := bindingTypes(columndb, str, columnsType)
+					query := bindingTypes(str, columnsType, columns[columnIdx])
 
 					if globalSearch != "" && query != "" {
 						globalSearch += " OR "
@@ -237,11 +235,7 @@ func filterIndividual(c interface {
 			str := c.GetString(requestColumnQuery)
 
 			if columnIdx > -1 && requestColumn == "true" && str != "" {
-
-				column := columns[columnIdx]
-				columndb := column.Db
-
-				query := bindingTypes(columndb, str, columnsType)
+				query := bindingTypes(str, columnsType, columns[columnIdx])
 
 				if columnSearch != "" && query != "" {
 					columnSearch += " AND "
@@ -352,19 +346,28 @@ func search(column map[int]Data, keyColumnsI string) int {
 }
 
 //check if searchable field is string
-func bindingTypes(columndb string, value string, columnsType []*sql.ColumnType) string {
-
+func bindingTypes(value string, columnsType []*sql.ColumnType, column Data) string {
+	columndb := column.Db
 	for _, element := range columnsType {
 		if element.Name() == columndb {
 
 			switch element.ScanType().String() {
 			case "string":
-				str := "%" + value + "%"
-				return fmt.Sprintf("%s LIKE '%s'", columndb, str)
+				if column.Cs {
+					return fmt.Sprintf("%s LIKE '%s'", columndb, "%"+value+"%")
+				}
+				return fmt.Sprintf("Lower(%s) LIKE '%s'", columndb, "%"+strings.ToLower(value)+"%")
 			case "int32":
 				intval, err := strconv.Atoi(value)
 				check(err)
 				return fmt.Sprintf("%s = %d", columndb, intval)
+			case "bool":
+				boolval, _ := strconv.ParseBool(value)
+				queryval := "NOT"
+				if boolval {
+					queryval = ""
+				}
+				return fmt.Sprintf("%s IS %s TRUE", columndb, queryval)
 			default:
 				fmt.Printf("New type %v\n", element.ScanType().String())
 				return ""
@@ -408,6 +411,7 @@ func getFields(rows *sql.Rows) map[string]interface{} {
 		case "bool":
 			value[key] = val.(bool)
 		default:
+
 			value[key] = val
 		}
 
