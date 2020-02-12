@@ -253,6 +253,7 @@ func filterIndividual(c interface {
 	}
 }
 
+//Refactor this
 func order(c interface {
 	GetString(string, ...string) string
 }, columns map[int]Data) func(db *gorm.DB) *gorm.DB {

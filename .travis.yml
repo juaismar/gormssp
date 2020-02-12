@@ -13,10 +13,14 @@ install:
 
 stages:
   - test
+services:
+  - postgresql
 
 jobs:
   include:
     - stage: test
+      before_script:
+        - psql -c 'create database travis_ci_test;' -U postgres
       script:
         - ginkgo -r --randomizeAllSpecs --randomizeSuites --failOnPending --cover --trace --race --progress
       after_success:
