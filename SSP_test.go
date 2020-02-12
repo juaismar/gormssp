@@ -93,6 +93,83 @@ var _ = Describe("Test for SSP", func() {
 			
 			Expect(result.Data).To(Equal(testData))
 		})
+		//global search
+		It("returns 2 Juan", func() {
+
+			mapa := make(map[string]string)
+			mapa["draw"] = "64"
+			mapa["start"] = "0"
+			mapa["length"] = "10"
+			mapa["order[0][column]"] = "0"
+			mapa["order[0][dir]"] = "asc"
+			
+			mapa["search[value]"] = "uAn"
+
+
+			mapa["columns[0][data]"] = "0"
+			mapa["columns[0][searchable]"] = "true"
+			mapa["columns[0][search][value]"] = ""
+
+			c := Controller{Params: mapa}
+
+			columns := make(map[int]Data)
+			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
+			result := Simple(&c, db, "users", columns)
+
+			Expect(result.Draw).To(Equal(64))
+			Expect(result.RecordsTotal).To(Equal(6))
+			Expect(result.RecordsFiltered).To(Equal(2))
+
+			testData := make([]interface{}, 0)
+			row := make(map[string]interface{})
+			row["0"] = "Juan"
+			testData = append(testData, row)
+			row = make(map[string]interface{})
+			row["0"] = "JuAn"
+			testData = append(testData, row)
+			
+			Expect(result.Data).To(Equal(testData))
+		})
+		//naming a row
+		It("returns all", func() {
+
+			mapa := make(map[string]string)
+			mapa["draw"] = "64"
+			mapa["start"] = "0"
+			mapa["length"] = "3"
+			mapa["order[0][column]"] = "0"
+			mapa["order[0][dir]"] = "asc"
+			
+			mapa["search[value]"] = "uAn"
+
+
+			mapa["columns[0][data]"] = "0"
+			mapa["columns[0][searchable]"] = "true"
+			mapa["columns[0][search][value]"] = ""
+
+			c := Controller{Params: mapa}
+
+			columns := make(map[int]Data)
+			columns[0] = Data{Db: "name", Dt: "supername", Formatter: nil}
+			result := Simple(&c, db, "users", columns)
+
+			Expect(result.Draw).To(Equal(64))
+			Expect(result.RecordsTotal).To(Equal(6))
+			Expect(result.RecordsFiltered).To(Equal(6))
+
+			testData := make([]interface{}, 0)
+			row := make(map[string]interface{})
+			row["supername"] = "Juan"
+			testData = append(testData, row)
+			row = make(map[string]interface{})
+			row["supername"] = "JuAn"
+			testData = append(testData, row)
+			row = make(map[string]interface{})
+			row["supername"] = "Joaquin"
+			testData = append(testData, row)
+			
+			Expect(result.Data).To(Equal(testData))
+		})
 		//search LIKE string case insensitive
 		It("returns 2 Juan", func() {
 
