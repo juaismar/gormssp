@@ -14,7 +14,7 @@ import (
 type Data struct {
 	Db        string                                                         //name of column
 	Dt        interface{}                                                    //id of column in client (int or string)
-	Cs        bool                                                           //case sensitive - optional
+	Cs        bool                                                           //case sensitive - optional default false
 	Formatter func(data interface{}, row map[string]interface{}) interface{} // - optional
 }
 
@@ -353,9 +353,9 @@ func bindingTypes(value string, columnsType []*sql.ColumnType, column Data) stri
 			switch element.ScanType().String() {
 			case "string":
 				if column.Cs {
-					columndb, value = caseInensitive(columndb, value)
+					return fmt.Sprintf("%s LIKE '%s'", columndb, "%"+value+"%")
 				}
-				return fmt.Sprintf("%s LIKE '%s'", columndb, "%"+value+"%")
+				return fmt.Sprintf("Lower(%s) LIKE '%s'", columndb, "%"+strings.ToLower(value)+"%")
 			case "int32":
 				intval, err := strconv.Atoi(value)
 				check(err)
@@ -375,10 +375,6 @@ func bindingTypes(value string, columnsType []*sql.ColumnType, column Data) stri
 	}
 
 	return ""
-}
-
-func caseInensitive(columndb, value string) (string, string) {
-	return "Lower(" + columndb + ")", strings.ToLower(value)
 }
 
 // https://github.com/jinzhu/gorm/issues/1167
