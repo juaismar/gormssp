@@ -1,6 +1,7 @@
 package SSP
 
 import (
+	"fmt"
 	"time"
 	"gormssp/test"
 	"github.com/jinzhu/gorm"
@@ -46,7 +47,7 @@ var _ = Describe("Test for SSP", func() {
 			row["0"] = "Juan"
 			testData = append(testData, row)
 			row = make(map[string]interface{})
-			row["0"] = "Juan"
+			row["0"] = "JuAn"
 			testData = append(testData, row)
 			row = make(map[string]interface{})
 			row["0"] = "Joaquin"
@@ -92,7 +93,7 @@ var _ = Describe("Test for SSP", func() {
 			
 			Expect(result.Data).To(Equal(testData))
 		})
-		//search LIKE string
+		//search LIKE string case insensitive
 		It("returns 2 Juan", func() {
 
 			mapa := make(map[string]string)
@@ -104,7 +105,7 @@ var _ = Describe("Test for SSP", func() {
 
 			mapa["columns[0][data]"] = "0"
 			mapa["columns[0][searchable]"] = "true"
-			mapa["columns[0][search][value]"] = "uan"
+			mapa["columns[0][search][value]"] = "uAn"
 
 			c := Controller{Params: mapa}
 
@@ -121,13 +122,45 @@ var _ = Describe("Test for SSP", func() {
 			row["0"] = "Juan"
 			testData = append(testData, row)
 			row = make(map[string]interface{})
-			row["0"] = "Juan"
+			row["0"] = "JuAn"
 			testData = append(testData, row)
 			
 			Expect(result.Data).To(Equal(testData))
 		})
+		//search LIKE string case sensitive
+		It("returns 2 Juan", func() {
+
+			mapa := make(map[string]string)
+			mapa["draw"] = "64"
+			mapa["start"] = "0"
+			mapa["length"] = "10"
+			mapa["order[0][column]"] = "0"
+			mapa["order[0][dir]"] = "asc"
+
+			mapa["columns[0][data]"] = "0"
+			mapa["columns[0][searchable]"] = "true"
+			mapa["columns[0][search][value]"] = "uAn"
+
+			c := Controller{Params: mapa}
+
+			columns := make(map[int]Data)
+			columns[0] = Data{Db: "name", Dt: 0, Cs: true, Formatter: nil}
+			result := Simple(&c, db, "users", columns)
+
+			Expect(result.Draw).To(Equal(64))
+			Expect(result.RecordsTotal).To(Equal(6))
+			Expect(result.RecordsFiltered).To(Equal(1))
+
+			testData := make([]interface{}, 0)
+			row := make(map[string]interface{})
+			row["0"] = "JuAn"
+			testData = append(testData, row)
+			
+			Expect(result.Data).To(Equal(testData))
+		})
+
 		//search int
-		XIt("returns 2 Age 15", func() {
+		It("returns 2 Age 15", func() {
 
 			mapa := make(map[string]string)
 			mapa["draw"] = "64"
@@ -157,21 +190,18 @@ var _ = Describe("Test for SSP", func() {
 
 			testData := make([]interface{}, 0)
 			row := make(map[string]interface{})
-			row["0"] = "Juan"
-			row["1"] = 15
+			row["0"] = "JuAn"
+			row["1"] = int64(15)
 			testData = append(testData, row)
 			row = make(map[string]interface{})
 			row["0"] = "Marta"
-			row["1"] = 15
+			row["1"] = int64(15)
 			testData = append(testData, row)
 			
 			Expect(result.Data).To(Equal(testData))
-			/*a := result.Data[0]
-			b := testData[0]
-			Expect(a[1]).To(Equal(b[1]))*/
 		})
 		//search bool
-		It("returns 2 Age 15", func() {
+		It("returns fun only Juan Joaquin Laura", func() {
 
 			mapa := make(map[string]string)
 			mapa["draw"] = "64"
@@ -197,7 +227,7 @@ var _ = Describe("Test for SSP", func() {
 
 			Expect(result.Draw).To(Equal(64))
 			Expect(result.RecordsTotal).To(Equal(6))
-			Expect(result.RecordsFiltered).To(Equal(6))
+			Expect(result.RecordsFiltered).To(Equal(3))
 
 			testData := make([]interface{}, 0)
 			row := make(map[string]interface{})
@@ -214,14 +244,128 @@ var _ = Describe("Test for SSP", func() {
 			testData = append(testData, row)
 			
 			Expect(result.Data).To(Equal(testData))
-			/*a := result.Data[0]
-			b := testData[0]
-			Expect(a[1]).To(Equal(b[1]))*/
+		})
+		//test format
+		It("return name whit prefix and age", func() {
+
+			mapa := make(map[string]string)
+			mapa["draw"] = "62"
+			mapa["start"] = "0"
+			mapa["length"] = "4"
+			mapa["order[0][column]"] = "0"
+			mapa["order[0][dir]"] = "asc"
+
+			c := Controller{Params: mapa}
+
+			columns := make(map[int]Data)
+			columns[0] = Data{Db: "name", Dt: 0, Formatter: func(
+				data interface{}, row map[string]interface{}) interface{} {
+				return fmt.Sprintf("PREFIX_%v_%v", data, row["age"])
+			}}
+		
+			result := Simple(&c, db, "users", columns)
+
+			Expect(result.Draw).To(Equal(62))
+			Expect(result.RecordsTotal).To(Equal(6))
+			Expect(result.RecordsFiltered).To(Equal(6))
+
+			testData := make([]interface{}, 0)
+			row := make(map[string]interface{})
+			row["0"] = "PREFIX_Juan_10"
+			testData = append(testData, row)
+			row = make(map[string]interface{})
+			row["0"] = "PREFIX_JuAn_15"
+			testData = append(testData, row)
+			row = make(map[string]interface{})
+			row["0"] = "PREFIX_Joaquin_18"
+			testData = append(testData, row)
+			row = make(map[string]interface{})
+			row["0"] = "PREFIX_Ezequiel_13"
+			testData = append(testData, row)
+			
+			Expect(result.Data).To(Equal(testData))
 		})
 	})
+	Describe("Complex", func() {
+		//filter whereall (where in all queries)
+		It("returns fun only Juan Joaquin Laura", func() {
 
+			mapa := make(map[string]string)
+			mapa["draw"] = "62"
+			mapa["start"] = "0"
+			mapa["length"] = "4"
+			mapa["order[0][column]"] = "0"
+			mapa["order[0][dir]"] = "asc"
 
+			c := Controller{Params: mapa}
 
+			columns := make(map[int]Data)
+			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
+
+			whereResult := make([]string, 0)
+
+			whereAll := make([]string, 0)
+			whereAll = append(whereAll, "fun IS TRUE")
+
+			result := Complex(&c, db, "users", columns, whereResult, whereAll)
+
+			Expect(result.Draw).To(Equal(62))
+			Expect(result.RecordsTotal).To(Equal(6))
+			Expect(result.RecordsFiltered).To(Equal(3))
+
+			testData := make([]interface{}, 0)
+			row := make(map[string]interface{})
+			row["0"] = "Juan"
+			testData = append(testData, row)
+			row = make(map[string]interface{})
+			row["0"] = "Joaquin"
+			testData = append(testData, row)
+			row = make(map[string]interface{})
+			row["0"] = "Laura"
+			testData = append(testData, row)
+			
+			Expect(result.Data).To(Equal(testData))
+		})
+		//filter whereResult (where in only result sended)
+		It("returns fun only Juan Joaquin Laura", func() {
+
+			mapa := make(map[string]string)
+			mapa["draw"] = "62"
+			mapa["start"] = "0"
+			mapa["length"] = "4"
+			mapa["order[0][column]"] = "0"
+			mapa["order[0][dir]"] = "asc"
+
+			c := Controller{Params: mapa}
+
+			columns := make(map[int]Data)
+			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
+
+			whereResult := make([]string, 0)
+			whereResult = append(whereResult, "fun IS TRUE")
+
+			whereAll := make([]string, 0)
+
+			result := Complex(&c, db, "users", columns, whereResult, whereAll)
+
+			Expect(result.Draw).To(Equal(62))
+			Expect(result.RecordsTotal).To(Equal(6))
+			Expect(result.RecordsFiltered).To(Equal(6))
+
+			testData := make([]interface{}, 0)
+			row := make(map[string]interface{})
+			row["0"] = "Juan"
+			testData = append(testData, row)
+			row = make(map[string]interface{})
+			row["0"] = "Joaquin"
+			testData = append(testData, row)
+			row = make(map[string]interface{})
+			row["0"] = "Laura"
+			testData = append(testData, row)
+			
+			Expect(result.Data).To(Equal(testData))
+		})
+	})
 
 	Describe("flated", func() {
 		It("returns Empty", func() {
@@ -301,11 +445,9 @@ var _ = Describe("Test for SSP", func() {
 	})
 })
 func OpenTestConnection() (db *gorm.DB, err error) {
-
-	// fmt.Println("testing postgres...")
-	//if dbDSN == "" {
-		dbDSN := "user=postgress password=postgress DB.name=postgress port=5432 sslmode=disable"
-	//}
+	
+	dbDSN := "user=postgress password=postgress DB.name=postgress port=5432 sslmode=disable"
+	
 	db, err = gorm.Open("postgres", dbDSN)
 	
 	db.LogMode(true)
@@ -320,7 +462,6 @@ func initDB() *gorm.DB{
 	if err != nil {
 	  panic(err)
 	}
-	//defer db.Close()
   
 	db.AutoMigrate(&model.User{})
   
@@ -332,7 +473,7 @@ func initDB() *gorm.DB{
 
 func fillData(db *gorm.DB){
 	db.Create(&model.User{Name: "Juan", Age:10, BirthDate: time.Now(), Fun: true})
-	db.Create(&model.User{Name: "Juan", Age:15, BirthDate: time.Now(), Fun: false})
+	db.Create(&model.User{Name: "JuAn", Age:15, BirthDate: time.Now(), Fun: false})
 	db.Create(&model.User{Name: "Joaquin", Age:18, BirthDate: time.Now(), Fun: true})
 	db.Create(&model.User{Name: "Ezequiel", Age:13, BirthDate: time.Now(), Fun: false})
 	db.Create(&model.User{Name: "Marta", Age:15, BirthDate: time.Now(), Fun: false})
