@@ -3,7 +3,7 @@ package SSP
 import (
 	"fmt"
 	"time"
-	"gormssp/test"
+	"github.com/juaismar/gormssp/test"
 	"github.com/jinzhu/gorm"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
