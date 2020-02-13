@@ -5,6 +5,8 @@ _Using Datatables pagination with golang_
 [![Build Status](https://travis-ci.org/juaismar/gormssp.svg?branch=master)](https://travis-ci.org/juaismar/gormssp)
 [![Go Report Card](https://goreportcard.com/badge/github.com/juaismar/gormssp)](https://goreportcard.com/report/github.com/juaismar/gormssp)
 [![codecov](https://codecov.io/gh/juaismar/gormssp/branch/master/graph/badge.svg)](https://codecov.io/gh/juaismar/gormssp)
+[![MIT
+licensed](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/juaismar/gormssp/master/LICENSE)
 
 
 ### Pre-requisites 📋
