@@ -93,6 +93,90 @@ var _ = Describe("Test for SSP", func() {
 			
 			Expect(result.Data).To(Equal(testData))
 		})
+		//global search
+		It("returns 2 Juan", func() {
+
+			mapa := make(map[string]string)
+			mapa["draw"] = "64"
+			mapa["start"] = "0"
+			mapa["length"] = "10"
+			mapa["order[0][column]"] = "0"
+			mapa["order[0][dir]"] = "asc"
+			
+			mapa["search[value]"] = "uAn"
+
+			mapa["columns[0][data]"] = "0"
+			mapa["columns[0][searchable]"] = "true"
+			mapa["columns[0][search][value]"] = ""
+
+			mapa["columns[1][data]"] = "0"
+			mapa["columns[1][searchable]"] = "true"
+			mapa["columns[1][search][value]"] = ""
+
+
+			c := Controller{Params: mapa}
+
+			columns := make(map[int]Data)
+			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
+			columns[1] = Data{Db: "surname", Dt: 1, Formatter: nil}
+			result := Simple(&c, db, "users", columns)
+
+			Expect(result.Draw).To(Equal(64))
+			Expect(result.RecordsTotal).To(Equal(6))
+			Expect(result.RecordsFiltered).To(Equal(2))
+
+			testData := make([]interface{}, 0)
+			row := make(map[string]interface{})
+			row["0"] = "Juan"
+			row["1"] = "Tambor"
+			testData = append(testData, row)
+			row = make(map[string]interface{})
+			row["0"] = "JuAn"
+			row["1"] = "Trompeta"
+			testData = append(testData, row)
+			
+			Expect(result.Data).To(Equal(testData))
+		})
+		//naming a row
+		It("returns all", func() {
+
+			mapa := make(map[string]string)
+			mapa["draw"] = "64"
+			mapa["start"] = "0"
+			mapa["length"] = "3"
+			mapa["order[0][column]"] = "0"
+			mapa["order[0][dir]"] = "asc"
+			
+			mapa["search[value]"] = "uAn"
+
+
+			mapa["columns[0][data]"] = "0"
+			mapa["columns[0][searchable]"] = "true"
+			mapa["columns[0][search][value]"] = ""
+
+			c := Controller{Params: mapa}
+
+			columns := make(map[int]Data)
+			columns[0] = Data{Db: "name", Dt: "supername", Formatter: nil}
+			result := Simple(&c, db, "users", columns)
+
+			Expect(result.Draw).To(Equal(64))
+			Expect(result.RecordsTotal).To(Equal(6))
+			Expect(result.RecordsFiltered).To(Equal(6))
+
+			testData := make([]interface{}, 0)
+			row := make(map[string]interface{})
+			row["supername"] = "Juan"
+			testData = append(testData, row)
+			row = make(map[string]interface{})
+			row["supername"] = "JuAn"
+			testData = append(testData, row)
+			row = make(map[string]interface{})
+			row["supername"] = "Joaquin"
+			testData = append(testData, row)
+			
+			Expect(result.Data).To(Equal(testData))
+		})
 		//search LIKE string case insensitive
 		It("returns 2 Juan", func() {
 
@@ -107,10 +191,16 @@ var _ = Describe("Test for SSP", func() {
 			mapa["columns[0][searchable]"] = "true"
 			mapa["columns[0][search][value]"] = "uAn"
 
+			
+			mapa["columns[1][data]"] = "0"
+			mapa["columns[1][searchable]"] = "true"
+			mapa["columns[1][search][value]"] = ""
+
 			c := Controller{Params: mapa}
 
 			columns := make(map[int]Data)
 			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
+			columns[1] = Data{Db: "surname", Dt: 1, Formatter: nil}
 			result := Simple(&c, db, "users", columns)
 
 			Expect(result.Draw).To(Equal(64))
@@ -120,9 +210,11 @@ var _ = Describe("Test for SSP", func() {
 			testData := make([]interface{}, 0)
 			row := make(map[string]interface{})
 			row["0"] = "Juan"
+			row["1"] = "Tambor"
 			testData = append(testData, row)
 			row = make(map[string]interface{})
 			row["0"] = "JuAn"
+			row["1"] = "Trompeta"
 			testData = append(testData, row)
 			
 			Expect(result.Data).To(Equal(testData))
@@ -281,6 +373,96 @@ var _ = Describe("Test for SSP", func() {
 			testData = append(testData, row)
 			row = make(map[string]interface{})
 			row["0"] = "PREFIX_Ezequiel_13"
+			testData = append(testData, row)
+			
+			Expect(result.Data).To(Equal(testData))
+		})
+		It("Ordering by surname asc", func() {
+
+			mapa := make(map[string]string)
+			mapa["draw"] = "64"
+			mapa["start"] = "0"
+			mapa["length"] = "10"
+			mapa["order[0][column]"] = "1"
+			mapa["order[0][dir]"] = "asc"
+			
+			mapa["search[value]"] = "uAn"
+
+			mapa["columns[0][data]"] = "0"
+			mapa["columns[0][searchable]"] = "true"
+			mapa["columns[0][orderable]"] = "true"
+			mapa["columns[0][search][value]"] = ""
+
+			mapa["columns[1][data]"] = "0"
+			mapa["columns[1][searchable]"] = "true"
+			mapa["columns[1][orderable]"] = "true"
+			mapa["columns[1][search][value]"] = ""
+
+
+			c := Controller{Params: mapa}
+
+			columns := make(map[int]Data)
+			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
+			columns[1] = Data{Db: "surname", Dt: 1, Formatter: nil}
+			result := Simple(&c, db, "users", columns)
+
+			Expect(result.Draw).To(Equal(64))
+			Expect(result.RecordsTotal).To(Equal(6))
+			Expect(result.RecordsFiltered).To(Equal(2))
+
+			testData := make([]interface{}, 0)
+			row := make(map[string]interface{})
+			row["0"] = "Juan"
+			row["1"] = "Tambor"
+			testData = append(testData, row)
+			row = make(map[string]interface{})
+			row["0"] = "JuAn"
+			row["1"] = "Trompeta"
+			testData = append(testData, row)
+			
+			Expect(result.Data).To(Equal(testData))
+		})
+		It("Ordering by surname desc", func() {
+
+			mapa := make(map[string]string)
+			mapa["draw"] = "64"
+			mapa["start"] = "0"
+			mapa["length"] = "10"
+			mapa["order[0][column]"] = "1"
+			mapa["order[0][dir]"] = "desc"
+			
+			mapa["search[value]"] = "uAn"
+
+			mapa["columns[0][data]"] = "0"
+			mapa["columns[0][searchable]"] = "true"
+			mapa["columns[0][orderable]"] = "true"
+			mapa["columns[0][search][value]"] = ""
+
+			mapa["columns[1][data]"] = "0"
+			mapa["columns[1][searchable]"] = "true"
+			mapa["columns[1][orderable]"] = "true"
+			mapa["columns[1][search][value]"] = ""
+
+
+			c := Controller{Params: mapa}
+
+			columns := make(map[int]Data)
+			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
+			columns[1] = Data{Db: "surname", Dt: 1, Formatter: nil}
+			result := Simple(&c, db, "users", columns)
+
+			Expect(result.Draw).To(Equal(64))
+			Expect(result.RecordsTotal).To(Equal(6))
+			Expect(result.RecordsFiltered).To(Equal(2))
+
+			testData := make([]interface{}, 0)
+			row := make(map[string]interface{})
+			row["0"] = "JuAn"
+			row["1"] = "Trompeta"
+			testData = append(testData, row)
+			row = make(map[string]interface{})
+			row["0"] = "Juan"
+			row["1"] = "Tambor"
 			testData = append(testData, row)
 			
 			Expect(result.Data).To(Equal(testData))
@@ -472,10 +654,10 @@ func initDB() *gorm.DB{
 }
 
 func fillData(db *gorm.DB){
-	db.Create(&model.User{Name: "Juan", Age:10, BirthDate: time.Now(), Fun: true})
-	db.Create(&model.User{Name: "JuAn", Age:15, BirthDate: time.Now(), Fun: false})
-	db.Create(&model.User{Name: "Joaquin", Age:18, BirthDate: time.Now(), Fun: true})
-	db.Create(&model.User{Name: "Ezequiel", Age:13, BirthDate: time.Now(), Fun: false})
-	db.Create(&model.User{Name: "Marta", Age:15, BirthDate: time.Now(), Fun: false})
-	db.Create(&model.User{Name: "Laura", Age:10, BirthDate: time.Now(), Fun: true})
+	db.Create(&model.User{Name: "Juan", Surname: "Tambor", Age:10, BirthDate: time.Now(), Fun: true})
+	db.Create(&model.User{Name: "JuAn", Surname: "Trompeta", Age:15, BirthDate: time.Now(), Fun: false})
+	db.Create(&model.User{Name: "Joaquin", Surname: "Flauta", Age:18, BirthDate: time.Now(), Fun: true})
+	db.Create(&model.User{Name: "Ezequiel", Surname: "Trompeta", Age:13, BirthDate: time.Now(), Fun: false})
+	db.Create(&model.User{Name: "Marta", Surname: "Tambor", Age:15, BirthDate: time.Now(), Fun: false})
+	db.Create(&model.User{Name: "Laura", Surname: "Flauta", Age:10, BirthDate: time.Now(), Fun: true})
 }
