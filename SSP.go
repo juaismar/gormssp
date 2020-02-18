@@ -105,6 +105,7 @@ func Complex(c interface {
 	var recordsFiltered int
 	conn.Scopes(filterGlobal(c, columns, columnsType),
 		filterIndividual(c, columns, columnsType)).
+		Where(whereResultFlated).
 		Where(whereAllFlated).
 		Table(table).
 		Count(&recordsFiltered)
