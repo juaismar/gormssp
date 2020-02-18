@@ -60,7 +60,7 @@ func Simple(c interface {
 
 	//search in DDBB recordsTotal
 	var recordsTotal int
-	conn.Table(table).Where(whereAllFlated).Count(&recordsTotal)
+	conn.Table(table).Count(&recordsTotal)
 
 	responseJSON := MessageDataTable{
 		Draw:            draw,
@@ -111,7 +111,7 @@ func Complex(c interface {
 
 	//search in DDBB recordsTotal
 	var recordsTotal int
-	conn.Table(table).Count(&recordsTotal)
+	conn.Table(table).Where(whereAllFlated).Count(&recordsTotal)
 
 	responseJSON := MessageDataTable{
 		Draw:            draw,
