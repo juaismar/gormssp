@@ -105,13 +105,14 @@ func Complex(c interface {
 	var recordsFiltered int
 	conn.Scopes(filterGlobal(c, columns, columnsType),
 		filterIndividual(c, columns, columnsType)).
+		Where(whereResultFlated).
 		Where(whereAllFlated).
 		Table(table).
 		Count(&recordsFiltered)
 
 	//search in DDBB recordsTotal
 	var recordsTotal int
-	conn.Table(table).Count(&recordsTotal)
+	conn.Table(table).Where(whereAllFlated).Count(&recordsTotal)
 
 	responseJSON := MessageDataTable{
 		Draw:            draw,
