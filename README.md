@@ -33,7 +33,7 @@ import ("github.com/juaismar/gormssp")
 ```
 ## Working example 🚀
 
--// TODO, show a better example
+-This is a simple code that send data to the Datatables JS client.
 ```
 import ("github.com/juaismar/gormssp")
 
@@ -42,7 +42,7 @@ func (c *User) Pagination() {
   // Array of database columns which should be read and sent back to DataTables.
   // The `db` parameter represents the column name in the database, while the `dt`
   // parameter represents the DataTables column identifier. In this case simple
-  // indexes
+  // indexes but can be a string
   // Formatter is a function to customize the value of field , can be nil.
   columns := make(map[int]SSP.Data)
   columns[0] = SSP.Data{Db: "name", Dt: 0, Formatter: nil}
@@ -50,12 +50,45 @@ func (c *User) Pagination() {
   columns[2] = SSP.Data{Db: "email", Dt: 2, Formatter: nil}
 
   // Send the data to the client
+  // "users" is the name of the table
   c.Data["json"] = SSP.Simple(c, model.ORM, "users", columns)
   c.ServeJSON()
 }
 ```
 
--This project is based in the PHP version of datatables pagination in https://datatables.net/examples/data_sources/server_side -
+-This is a example of data formatting.
+```
+columns[3] = SSP.Data{Db: "registered", Dt: 3, Formatter: func(
+  data interface{}, row map[string]interface{}) interface{} {
+  //data is the value id column, row is a map whit the values of all columns
+  if data != nil {
+    return data.(time.Time).Format("2006-01-02 15:04:05")
+  }
+  return ""
+}}
+```
+
+-This is a complex example.
+```
+import ("github.com/juaismar/gormssp")
+
+func (c *User) Pagination() {
+    columns := make(map[int]SSP.Data)
+    columns[0] = SSP.Data{Db: "id", Dt: "id", Formatter: nil}
+	
+    //whereResult is a WHERE condition to apply to the result set
+    //whereAll is a WHERE condition to apply to all queries
+    var whereResult []string
+    var whereAll []string
+    whereAll = append(whereAll, "deleted_at IS NULL")
+
+    c.Data["json"] = SSP.Complex(c, model.ORM, "events", columns, whereResult, whereAll)
+    c.ServeJSON()
+}
+```
+
+-This project is based in the PHP version of datatables pagination in https://datatables.net/examples/data_sources/server_side
+-Original file can be found in https://github.com/DataTables/DataTables/blob/master/examples/server_side/scripts/ssp.class.php
 
 ## Author ✒️
 
