@@ -187,15 +187,20 @@ var _ = Describe("Test for SSP", func() {
 			mapa["columns[0][searchable]"] = "true"
 			mapa["columns[0][search][value]"] = ""
 
-			mapa["columns[1][data]"] = "0"
+			mapa["columns[1][data]"] = "1"
 			mapa["columns[1][searchable]"] = "true"
 			mapa["columns[1][search][value]"] = ""
+
+			mapa["columns[2][data]"] = "2"
+			mapa["columns[2][searchable]"] = "true"
+			mapa["columns[2][search][value]"] = ""
 
 			c := Controller{Params: mapa}
 
 			columns := make(map[int]Data)
 			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
 			columns[1] = Data{Db: "surname", Dt: 1, Formatter: nil}
+			columns[2] = Data{Db: "age", Dt: 2, Formatter: nil}
 			result := Simple(&c, db, "users", columns)
 
 			Expect(result.Draw).To(Equal(64))
@@ -206,10 +211,12 @@ var _ = Describe("Test for SSP", func() {
 			row := make(map[string]interface{})
 			row["0"] = "Juan"
 			row["1"] = "Tambor"
+			row["2"] = int64(10)
 			testData = append(testData, row)
 			row = make(map[string]interface{})
 			row["0"] = "JuAn"
 			row["1"] = "Trompeta"
+			row["2"] = int64(15)
 			testData = append(testData, row)
 
 			Expect(result.Data).To(Equal(testData))
@@ -224,11 +231,9 @@ var _ = Describe("Test for SSP", func() {
 			mapa["order[0][column]"] = "0"
 			mapa["order[0][dir]"] = "asc"
 
-			mapa["search[value]"] = "uAn"
-
-			mapa["columns[0][data]"] = "0"
-			mapa["columns[0][searchable]"] = "true"
-			mapa["columns[0][search][value]"] = ""
+			mapa["columns[supername][data]"] = "0"
+			mapa["columns[supername][searchable]"] = "true"
+			mapa["columns[supername][search][value]"] = ""
 
 			c := Controller{Params: mapa}
 

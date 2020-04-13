@@ -203,7 +203,7 @@ func filterGlobal(c interface {
 					globalSearch += query
 				} else {
 					if columnIdx < 0 && requestColumn == "true" {
-						fmt.Printf("Do you forgot searchable: false in column %v ?\n", keyColumnsData)
+						fmt.Printf("(002) Do you forgot searchable: false in column %v ?\n", keyColumnsData)
 					}
 				}
 			}
@@ -234,7 +234,6 @@ func filterIndividual(c interface {
 
 			requestColumnQuery = fmt.Sprintf("columns[%d][search][value]", i)
 			str := c.GetString(requestColumnQuery)
-
 			if columnIdx > -1 && requestColumn == "true" && str != "" {
 				query := bindingTypes(str, columnsType, columns[columnIdx])
 
@@ -246,7 +245,7 @@ func filterIndividual(c interface {
 
 			} else {
 				if columnIdx < 0 && requestColumn == "true" {
-					fmt.Printf("Do you forgot searchable: false in column %v ?\n", keyColumnsData)
+					fmt.Printf("(001) Do you forgot searchable: false in column %v ?\n", keyColumnsData)
 				}
 			}
 		}
@@ -351,7 +350,6 @@ func bindingTypes(value string, columnsType []*sql.ColumnType, column Data) stri
 	columndb := column.Db
 	for _, element := range columnsType {
 		if element.Name() == columndb {
-
 			switch element.ScanType().String() {
 			case "string":
 				if column.Cs {
@@ -360,7 +358,9 @@ func bindingTypes(value string, columnsType []*sql.ColumnType, column Data) stri
 				return fmt.Sprintf("Lower(%s) LIKE '%s'", columndb, "%"+strings.ToLower(value)+"%")
 			case "int32":
 				intval, err := strconv.Atoi(value)
-				check(err)
+				if err != nil {
+					return ""
+				}
 				return fmt.Sprintf("%s = %d", columndb, intval)
 			case "bool":
 				boolval, _ := strconv.ParseBool(value)
