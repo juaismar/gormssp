@@ -194,7 +194,9 @@ func filterGlobal(c interface {
 				requestColumn := c.GetString(requestColumnQuery)
 
 				if columnIdx > -1 && requestColumn == "true" {
-					query := bindingTypes(str, columnsType, columns[columnIdx])
+					requestRegexQuery := fmt.Sprintf("columns[%d][search][regex]", i)
+					requestRegex, _ := strconv.ParseBool(c.GetString(requestRegexQuery))
+					query := bindingTypes(str, columnsType, columns[columnIdx], requestRegex)
 
 					if globalSearch != "" && query != "" {
 						globalSearch += " OR "
@@ -235,7 +237,9 @@ func filterIndividual(c interface {
 			requestColumnQuery = fmt.Sprintf("columns[%d][search][value]", i)
 			str := c.GetString(requestColumnQuery)
 			if columnIdx > -1 && requestColumn == "true" && str != "" {
-				query := bindingTypes(str, columnsType, columns[columnIdx])
+				requestRegexQuery := fmt.Sprintf("columns[%d][search][regex]", i)
+				requestRegex, _ := strconv.ParseBool(c.GetString(requestRegexQuery))
+				query := bindingTypes(str, columnsType, columns[columnIdx], requestRegex)
 
 				if columnSearch != "" && query != "" {
 					columnSearch += " AND "
@@ -346,12 +350,16 @@ func search(column map[int]Data, keyColumnsI string) int {
 }
 
 //check if searchable field is string
-func bindingTypes(value string, columnsType []*sql.ColumnType, column Data) string {
+func bindingTypes(value string, columnsType []*sql.ColumnType, column Data, isRegEx bool) string {
 	columndb := column.Db
 	for _, element := range columnsType {
 		if element.Name() == columndb {
 			switch element.ScanType().String() {
 			case "string":
+				if isRegEx {
+					return fmt.Sprintf("%s ~* '%s'", columndb, value)
+				}
+
 				if column.Cs {
 					return fmt.Sprintf("%s LIKE '%s'", columndb, "%"+value+"%")
 				}
