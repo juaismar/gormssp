@@ -545,6 +545,40 @@ var _ = Describe("Test for SSP", func() {
 
 			Expect(result.Data).To(Equal(testData))
 		})
+		It("returns names whit 5 chars (regex)", func() {
+
+			mapa := make(map[string]string)
+			mapa["draw"] = "64"
+			mapa["start"] = "0"
+			mapa["length"] = "10"
+			mapa["order[0][column]"] = "0"
+			mapa["order[0][dir]"] = "asc"
+
+			mapa["columns[0][data]"] = "0"
+			mapa["columns[0][searchable]"] = "true"
+			mapa["columns[0][search][value]"] = "^.{5}$"
+			mapa["columns[0][search][regex]"] = "true"
+
+			c := Controller{Params: mapa}
+
+			columns := make(map[int]Data)
+			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
+			result := Simple(&c, db, "users", columns)
+
+			Expect(result.Draw).To(Equal(64))
+			Expect(result.RecordsTotal).To(Equal(6))
+			Expect(result.RecordsFiltered).To(Equal(2))
+
+			testData := make([]interface{}, 0)
+			row := make(map[string]interface{})
+			row["0"] = "Marta"
+			testData = append(testData, row)
+			row = make(map[string]interface{})
+			row["0"] = "Laura"
+			testData = append(testData, row)
+
+			Expect(result.Data).To(Equal(testData))
+		})
 	})
 	Describe("Complex", func() {
 		//filter whereall (where in all queries)
