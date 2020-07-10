@@ -545,6 +545,40 @@ var _ = Describe("Test for SSP", func() {
 
 			Expect(result.Data).To(Equal(testData))
 		})
+		It("Global search regex", func() {
+
+			mapa := make(map[string]string)
+			mapa["draw"] = "64"
+			mapa["start"] = "0"
+			mapa["length"] = "10"
+			mapa["order[0][column]"] = "1"
+			mapa["order[0][dir]"] = "desc"
+
+			mapa["search[value]"] = "^Eze"
+			mapa["search[regex]"] = "true"
+
+			mapa["columns[0][data]"] = "0"
+			mapa["columns[0][searchable]"] = "true"
+
+			c := Controller{Params: mapa}
+
+			columns := make(map[int]Data)
+			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
+			columns[1] = Data{Db: "surname", Dt: 1, Formatter: nil}
+			result := Simple(&c, db, "users", columns)
+
+			Expect(result.Draw).To(Equal(64))
+			Expect(result.RecordsTotal).To(Equal(6))
+			Expect(result.RecordsFiltered).To(Equal(1))
+
+			testData := make([]interface{}, 0)
+			row := make(map[string]interface{})
+			row["0"] = "Ezequiel"
+			row["1"] = "Trompeta"
+			testData = append(testData, row)
+
+			Expect(result.Data).To(Equal(testData))
+		})
 		It("returns names whit 5 chars (regex)", func() {
 
 			mapa := make(map[string]string)
