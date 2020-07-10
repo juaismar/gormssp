@@ -180,6 +180,7 @@ func filterGlobal(c interface {
 		str := c.GetString("search[value]")
 		//all columns filtering
 		if str != "" {
+			requestRegex, _ := strconv.ParseBool(c.GetString("search[regex]"))
 			var i int
 			for i = 0; ; i++ {
 				keyColumnsI := fmt.Sprintf("columns[%d][data]", i)
@@ -194,8 +195,7 @@ func filterGlobal(c interface {
 				requestColumn := c.GetString(requestColumnQuery)
 
 				if columnIdx > -1 && requestColumn == "true" {
-					requestRegexQuery := fmt.Sprintf("columns[%d][search][regex]", i)
-					requestRegex, _ := strconv.ParseBool(c.GetString(requestRegexQuery))
+
 					query := bindingTypes(str, columnsType, columns[columnIdx], requestRegex)
 
 					if globalSearch != "" && query != "" {

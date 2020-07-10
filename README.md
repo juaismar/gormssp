@@ -9,8 +9,6 @@ _Using Datatables pagination with golang_
 licensed](https://img.shields.io/github/license/juaismar/gormssp)](https://raw.githubusercontent.com/juaismar/gormssp/master/LICENSE)
 [![GoDoc](https://img.shields.io/badge/godoc-gormssp-blue.svg)](https://godoc.org/github.com/juaismar/gormssp)
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/juaismar/gormssp)
-![GitHub All Releases](https://img.shields.io/github/downloads/juaismar/gormssp/total)
-
 
 ### Pre-requisites 📋
 
