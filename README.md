@@ -13,8 +13,8 @@ licensed](https://img.shields.io/github/license/juaismar/gormssp)](https://raw.g
 ### Pre-requisites 📋
 
 * Oviously use it in a golang project
-* Gorm package (https://gorm.io/)(github.com/jinzhu/gorm)
-* Beego package (https://beego.me/)(github.com/astaxie/beego)
+* Gorm package (https://gorm.io/) (https://github.com/jinzhu/gorm)
+* Beego package (https://beego.me/) (https://github.com/astaxie/beego)
 
 ### Installation 🔧
 
