@@ -1,5 +1,6 @@
 package SSP
 
+//This file is comented until configure travish sqlite3
 import (
 	"fmt"
 	"time"
