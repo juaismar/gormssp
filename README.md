@@ -12,6 +12,8 @@ licensed](https://img.shields.io/github/license/juaismar/gormssp)](https://raw.g
 
 ### Pre-requisites 📋
 
+Database compatible: Postgres (stable), SQLite (whitout REGEXP)
+
 * Oviously use it in a golang project
 * Gorm package (https://gorm.io/) (https://github.com/jinzhu/gorm)
 * Beego package (https://beego.me/) (https://github.com/astaxie/beego)
@@ -30,6 +32,8 @@ _and import the package with:_
 import ("github.com/juaismar/gormssp")
 ```
 ## Working example 🚀
+
+A working example on https://github.com/juaismar/GormSSP_Example
 
 -This is a simple code that send data to the Datatables JS client.
 ```

@@ -11,6 +11,8 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+var dialect = ""
+
 type Data struct {
 	Db        string                                                         //name of column
 	Dt        interface{}                                                    //id of column in client (int or string)
@@ -31,6 +33,10 @@ func Simple(c interface {
 	table string,
 
 	columns map[int]Data) MessageDataTable {
+
+	dialect = conn.Dialect().GetName()
+
+	dbConfig(conn)
 
 	draw := 0
 	draw, err := strconv.Atoi(c.GetString("draw"))
@@ -77,6 +83,10 @@ func Complex(c interface {
 	GetString(string, ...string) string
 }, conn *gorm.DB, table string, columns map[int]Data,
 	whereResult []string, whereAll []string) MessageDataTable {
+
+	dialect = conn.Dialect().GetName()
+
+	dbConfig(conn)
 
 	draw := 0
 	draw, err := strconv.Atoi(c.GetString("draw"))
@@ -288,7 +298,12 @@ func order(c interface {
 					order := "desc"
 					if requestColumnData == "asc" {
 						order = "asc"
+					} else {
+						order = "desc"
 					}
+
+					order = checkOrderDialect(order)
+
 					query := fmt.Sprintf("%s %s", column.Db, order)
 					db = db.Order(query)
 				} else {
@@ -300,6 +315,17 @@ func order(c interface {
 		}
 		return db
 	}
+}
+func checkOrderDialect(order string) string {
+	if dialect == "sqlite3" {
+		if order == "asc" {
+			return "desc"
+		} else {
+			return "asc"
+		}
+	}
+
+	return order
 }
 
 func limit(c interface {
@@ -354,23 +380,29 @@ func bindingTypes(value string, columnsType []*sql.ColumnType, column Data, isRe
 	columndb := column.Db
 	for _, element := range columnsType {
 		if element.Name() == columndb {
-			switch element.ScanType().String() {
-			case "string":
+
+			searching := element.DatabaseTypeName()
+			if strings.Contains(searching, "varchar") {
+				searching = "varchar"
+			}
+
+			switch searching {
+			case "string", "TEXT", "varchar":
 				if isRegEx {
-					return fmt.Sprintf("%s ~* '%s'", columndb, value)
+					return regExp(columndb, value)
 				}
 
 				if column.Cs {
 					return fmt.Sprintf("%s LIKE '%s'", columndb, "%"+value+"%")
 				}
 				return fmt.Sprintf("Lower(%s) LIKE '%s'", columndb, "%"+strings.ToLower(value)+"%")
-			case "int32":
+			case "int32", "INT4", "integer":
 				intval, err := strconv.Atoi(value)
 				if err != nil {
 					return ""
 				}
 				return fmt.Sprintf("%s = %d", columndb, intval)
-			case "bool":
+			case "bool", "BOOL":
 				boolval, _ := strconv.ParseBool(value)
 				queryval := "NOT"
 				if boolval {
@@ -378,13 +410,22 @@ func bindingTypes(value string, columnsType []*sql.ColumnType, column Data, isRe
 				}
 				return fmt.Sprintf("%s IS %s TRUE", columndb, queryval)
 			default:
-				fmt.Printf("New type %v\n", element.ScanType().String())
+				fmt.Printf("New type %v\n", element.DatabaseTypeName())
 				return ""
 			}
 		}
 	}
 
 	return ""
+}
+func regExp(columndb, value string) string {
+	if dialect == "sqlite3" {
+		//TODO make regexp
+		return fmt.Sprintf("Lower(%s) LIKE '%s'", columndb, "%"+strings.ToLower(value)+"%")
+	} else {
+		return fmt.Sprintf("%s ~* '%s'", columndb, value)
+	}
+
 }
 
 // https://github.com/jinzhu/gorm/issues/1167
@@ -395,6 +436,8 @@ func getFields(rows *sql.Rows) map[string]interface{} {
 
 	length := len(columns)
 	current := makeResultReceiver(length)
+
+	columnsType, err := rows.ColumnTypes()
 
 	err = rows.Scan(current...)
 	check(err)
@@ -408,19 +451,26 @@ func getFields(rows *sql.Rows) map[string]interface{} {
 			continue
 		}
 		vType := reflect.TypeOf(val)
-		switch vType.String() {
-		case "int64":
-			value[key] = val.(int64)
-		case "string":
-			value[key] = val.(string)
-		case "time.Time":
-			value[key] = val.(time.Time)
-		case "[]uint8":
-			value[key] = string(val.([]uint8))
-		case "bool":
-			value[key] = val.(bool)
-		default:
+		searching := columnsType[i].DatabaseTypeName()
+		if strings.Contains(searching, "varchar") {
+			searching = "varchar"
+		}
 
+		switch searching {
+
+		case "string", "TEXT", "varchar":
+			value[key] = val.(string)
+		case "int32", "INT4", "integer":
+			value[key] = val.(int64)
+		case "bool", "BOOL":
+			if vType.String() == "int64" {
+				value[key] = val.(int64) == 1
+			} else {
+				value[key] = val.(bool)
+			}
+		case "TIMESTAMPTZ", "datetime":
+			value[key] = val.(time.Time)
+		default:
 			value[key] = val
 		}
 
@@ -446,8 +496,15 @@ func initBinding(db *gorm.DB, table string) []*sql.ColumnType {
 	check(err)
 
 	columnsType, err := rows.ColumnTypes()
+
 	check(err)
 
 	defer rows.Close()
 	return columnsType
+}
+
+func dbConfig(conn *gorm.DB) {
+	if dialect == "sqlite3" {
+		conn.Exec("PRAGMA case_sensitive_like = ON;")
+	}
 }
