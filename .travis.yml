@@ -3,7 +3,7 @@ language: go
 
 go:
   - 1.13.x
-  
+
 install:
   - go get -v ./...
   - go build ./...
@@ -12,7 +12,7 @@ install:
 
 test:
   adapter: sqlite3
-  database: ":travis_ci_test:"
+  database: ":test:"
   timeout: 500
 
 stages:
