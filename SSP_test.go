@@ -8,14 +8,6 @@ import (
 	. "github.com/onsi/ginkgo"
 )
 
-type Controller struct {
-	Params map[string]string
-}
-
-func (c *Controller) GetString(key string, def ...string) string {
-	return c.Params[key]
-}
-
 var _ = Describe("Test SQLITE", func() {
 	db := sqlite.OpenDB()
 

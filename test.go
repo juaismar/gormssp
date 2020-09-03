@@ -11,6 +11,14 @@ import (
 	. "github.com/onsi/gomega"
 )
 
+type Controller struct {
+	Params map[string]string
+}
+
+func (c *Controller) GetString(key string, def ...string) string {
+	return c.Params[key]
+}
+
 func FunctionsTest() {
 	Describe("flated", func() {
 		It("returns Empty", func() {
