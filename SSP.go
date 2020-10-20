@@ -470,6 +470,12 @@ func getFields(rows *sql.Rows) map[string]interface{} {
 			}
 		case "TIMESTAMPTZ", "datetime":
 			value[key] = val.(time.Time)
+		case "UUID":
+			if vType.String() == "[]uint8" {
+				value[key] = string(val.([]uint8))
+			} else {
+				value[key] = val
+			}
 		default:
 			value[key] = val
 		}
