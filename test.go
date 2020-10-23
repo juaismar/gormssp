@@ -535,7 +535,7 @@ func SimplexFunctionTest(db *gorm.DB) {
 			mapa["columns[0][searchable]"] = "true"
 			mapa["columns[0][search][value]"] = "uAn"
 
-			mapa["columns[1][data]"] = "0"
+			mapa["columns[1][data]"] = "1"
 			mapa["columns[1][searchable]"] = "true"
 			mapa["columns[1][search][value]"] = ""
 
@@ -558,6 +558,43 @@ func SimplexFunctionTest(db *gorm.DB) {
 			row = make(map[string]interface{})
 			row["0"] = "JuAn"
 			row["1"] = "Trompeta"
+			testData = append(testData, row)
+
+			Expect(result.Data).To(Equal(testData))
+		})
+		//search on varchar LIKE string case insensitive
+		It("returns 2 Tambor", func() {
+
+			mapa := make(map[string]string)
+			mapa["draw"] = "64"
+			mapa["start"] = "0"
+			mapa["length"] = "10"
+			mapa["order[0][column]"] = "0"
+			mapa["order[0][dir]"] = "asc"
+
+			mapa["columns[0][data]"] = "1"
+			mapa["columns[0][searchable]"] = "true"
+			mapa["columns[0][search][value]"] = "ambor"
+
+			c := Controller{Params: mapa}
+
+			columns := make(map[int]Data)
+			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
+			columns[1] = Data{Db: "instrument", Dt: 1, Formatter: nil}
+			result := Simple(&c, db, "users", columns)
+
+			Expect(result.Draw).To(Equal(64))
+			Expect(result.RecordsTotal).To(Equal(6))
+			Expect(result.RecordsFiltered).To(Equal(2))
+
+			testData := make([]interface{}, 0)
+			row := make(map[string]interface{})
+			row["0"] = "Juan"
+			row["1"] = "Tambor"
+			testData = append(testData, row)
+			row = make(map[string]interface{})
+			row["0"] = "Marta"
+			row["1"] = "Tambor"
 			testData = append(testData, row)
 
 			Expect(result.Data).To(Equal(testData))
@@ -594,7 +631,7 @@ func SimplexFunctionTest(db *gorm.DB) {
 			Expect(result.Data).To(Equal(testData))
 		})
 
-		//search int
+		//search uint
 		It("returns 2 Age 15", func() {
 
 			mapa := make(map[string]string)
@@ -635,6 +672,45 @@ func SimplexFunctionTest(db *gorm.DB) {
 
 			Expect(result.Data).To(Equal(testData))
 		})
+
+		//search int
+		It("returns 2 Age 15", func() {
+
+			mapa := make(map[string]string)
+			mapa["draw"] = "64"
+			mapa["start"] = "0"
+			mapa["length"] = "10"
+			mapa["order[0][column]"] = "0"
+			mapa["order[0][dir]"] = "asc"
+
+			mapa["columns[0][data]"] = "0"
+			mapa["columns[0][searchable]"] = "true"
+			mapa["columns[0][search][value]"] = ""
+
+			mapa["columns[1][data]"] = "1"
+			mapa["columns[1][searchable]"] = "true"
+			mapa["columns[1][search][value]"] = "10"
+
+			c := Controller{Params: mapa}
+
+			columns := make(map[int]Data)
+			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
+			columns[1] = Data{Db: "candies", Dt: 1, Formatter: nil}
+			result := Simple(&c, db, "users", columns)
+
+			Expect(result.Draw).To(Equal(64))
+			Expect(result.RecordsTotal).To(Equal(6))
+			Expect(result.RecordsFiltered).To(Equal(1))
+
+			testData := make([]interface{}, 0)
+			row := make(map[string]interface{})
+			row["0"] = "Joaquin"
+			row["1"] = int64(10)
+			testData = append(testData, row)
+
+			Expect(result.Data).To(Equal(testData))
+		})
+
 		//search bool
 		It("returns fun only Juan Joaquin Laura", func() {
 

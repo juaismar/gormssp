@@ -385,9 +385,8 @@ func bindingTypes(value string, columnsType []*sql.ColumnType, column Data, isRe
 			if strings.Contains(searching, "varchar") {
 				searching = "varchar"
 			}
-
 			switch searching {
-			case "string", "TEXT", "varchar":
+			case "string", "TEXT", "varchar", "VARCHAR":
 				if isRegEx {
 					return regExp(columndb, value)
 				}
@@ -458,7 +457,7 @@ func getFields(rows *sql.Rows) map[string]interface{} {
 
 		switch searching {
 
-		case "string", "TEXT", "varchar":
+		case "string", "TEXT", "varchar", "VARCHAR":
 			value[key] = val.(string)
 		case "int32", "INT4", "integer":
 			value[key] = val.(int64)
