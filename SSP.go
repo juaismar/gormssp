@@ -395,7 +395,7 @@ func bindingTypes(value string, columnsType []*sql.ColumnType, column Data, isRe
 					return fmt.Sprintf("%s LIKE '%s'", columndb, "%"+value+"%")
 				}
 				return fmt.Sprintf("Lower(%s) LIKE '%s'", columndb, "%"+strings.ToLower(value)+"%")
-			case "int32", "INT4", "integer":
+			case "int32", "INT4", "integer", "INTEGER":
 				intval, err := strconv.Atoi(value)
 				if err != nil {
 					return ""
