@@ -465,9 +465,9 @@ func getFields(rows *sql.Rows) map[string]interface{} {
 
 		case "string", "TEXT", "varchar", "VARCHAR":
 			value[key] = val.(string)
-		case "int32", "INT4", "integer":
+		case "int32", "INT4", "integer", "INTEGER":
 			value[key] = val.(int64)
-		case "NUMERIC", "real": // no diference between float32 and float64
+		case "NUMERIC", "real":
 			switch vType.String() {
 			case "[]uint8":
 				value[key], _ = strconv.ParseFloat(string(val.([]uint8)), 64)

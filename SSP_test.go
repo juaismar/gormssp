@@ -16,6 +16,7 @@ var _ = Describe("Test SQLITE", func() {
 	//RegExpTest(db)
 	TestTypes(db)
 	SimplexFunctionTest(db)
+	//TODO test id "INTEGER" type
 })
 
 var _ = Describe("Test POSTGRES", func() {
