@@ -381,6 +381,194 @@ func TestTypes(db *gorm.DB) {
 				Expect(result.Data).To(Equal(testData))
 			})
 		})
+		Describe("float32", func() {
+			It("returns money only Juan Marta", func() {
+
+				mapa := make(map[string]string)
+				mapa["draw"] = "64"
+				mapa["start"] = "0"
+				mapa["length"] = "10"
+				mapa["order[0][column]"] = "0"
+				mapa["order[0][dir]"] = "asc"
+
+				mapa["columns[0][data]"] = "0"
+				mapa["columns[0][searchable]"] = "true"
+				mapa["columns[0][search][value]"] = ""
+
+				mapa["columns[1][data]"] = "1"
+				mapa["columns[1][searchable]"] = "true"
+				mapa["columns[1][search][value]"] = "2.0"
+
+				c := Controller{Params: mapa}
+
+				columns := make(map[int]Data)
+				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
+				columns[1] = Data{Db: "money", Dt: 1, Formatter: nil}
+				result := Simple(&c, db, "users", columns)
+
+				Expect(result.Draw).To(Equal(64))
+				Expect(result.RecordsTotal).To(Equal(6))
+				Expect(result.RecordsFiltered).To(Equal(2))
+
+				testData := make([]interface{}, 0)
+				row := make(map[string]interface{})
+				row["0"] = "Juan"
+				row["1"] = float64(2.0)
+				testData = append(testData, row)
+				row = make(map[string]interface{})
+				row["0"] = "Marta"
+				row["1"] = float64(2.0)
+				testData = append(testData, row)
+
+				Expect(result.Data).To(Equal(testData))
+			})
+			It("returns all with decimals", func() {
+
+				mapa := make(map[string]string)
+				mapa["draw"] = "64"
+				mapa["start"] = "0"
+				mapa["length"] = "10"
+				mapa["order[0][column]"] = "0"
+				mapa["order[0][dir]"] = "asc"
+
+				mapa["columns[0][data]"] = "0"
+				mapa["columns[0][searchable]"] = "true"
+				mapa["columns[0][search][value]"] = ""
+
+				c := Controller{Params: mapa}
+
+				columns := make(map[int]Data)
+				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
+				columns[1] = Data{Db: "money", Dt: 1, Formatter: nil}
+				result := Simple(&c, db, "users", columns)
+
+				Expect(result.Draw).To(Equal(64))
+				Expect(result.RecordsTotal).To(Equal(6))
+				Expect(result.RecordsFiltered).To(Equal(6))
+
+				testData := make([]interface{}, 0)
+				row := make(map[string]interface{})
+				row["0"] = "Juan"
+				row["1"] = float64(2.0)
+				testData = append(testData, row)
+				row = make(map[string]interface{})
+				row["0"] = "JuAn"
+				row["1"] = float64(3.0999999046325684)
+				testData = append(testData, row)
+				row = make(map[string]interface{})
+				row["0"] = "Joaquin"
+				row["1"] = float64(3.4000000953674316)
+				testData = append(testData, row)
+				row = make(map[string]interface{})
+				row["0"] = "Ezequiel"
+				row["1"] = float64(22.110000610351562)
+				testData = append(testData, row)
+				row = make(map[string]interface{})
+				row["0"] = "Marta"
+				row["1"] = float64(2.0)
+				testData = append(testData, row)
+				row = make(map[string]interface{})
+				row["0"] = "Laura"
+				row["1"] = float64(0.10000000149011612)
+				testData = append(testData, row)
+
+				Expect(result.Data).To(Equal(testData))
+			})
+		})
+		Describe("float64", func() {
+			It("returns money only Juan Marta", func() {
+
+				mapa := make(map[string]string)
+				mapa["draw"] = "64"
+				mapa["start"] = "0"
+				mapa["length"] = "10"
+				mapa["order[0][column]"] = "0"
+				mapa["order[0][dir]"] = "asc"
+
+				mapa["columns[0][data]"] = "0"
+				mapa["columns[0][searchable]"] = "true"
+				mapa["columns[0][search][value]"] = ""
+
+				mapa["columns[1][data]"] = "1"
+				mapa["columns[1][searchable]"] = "true"
+				mapa["columns[1][search][value]"] = "3.0"
+
+				c := Controller{Params: mapa}
+
+				columns := make(map[int]Data)
+				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
+				columns[1] = Data{Db: "bitcoins", Dt: 1, Formatter: nil}
+				result := Simple(&c, db, "users", columns)
+
+				Expect(result.Draw).To(Equal(64))
+				Expect(result.RecordsTotal).To(Equal(6))
+				Expect(result.RecordsFiltered).To(Equal(2))
+
+				testData := make([]interface{}, 0)
+				row := make(map[string]interface{})
+				row["0"] = "Juan"
+				row["1"] = float64(3.0)
+				testData = append(testData, row)
+				row = make(map[string]interface{})
+				row["0"] = "Marta"
+				row["1"] = float64(3.0)
+				testData = append(testData, row)
+
+				Expect(result.Data).To(Equal(testData))
+			})
+			It("returns all with decimals", func() {
+
+				mapa := make(map[string]string)
+				mapa["draw"] = "64"
+				mapa["start"] = "0"
+				mapa["length"] = "10"
+				mapa["order[0][column]"] = "0"
+				mapa["order[0][dir]"] = "asc"
+
+				mapa["columns[0][data]"] = "0"
+				mapa["columns[0][searchable]"] = "true"
+				mapa["columns[0][search][value]"] = ""
+
+				c := Controller{Params: mapa}
+
+				columns := make(map[int]Data)
+				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
+				columns[1] = Data{Db: "bitcoins", Dt: 1, Formatter: nil}
+				result := Simple(&c, db, "users", columns)
+
+				Expect(result.Draw).To(Equal(64))
+				Expect(result.RecordsTotal).To(Equal(6))
+				Expect(result.RecordsFiltered).To(Equal(6))
+
+				testData := make([]interface{}, 0)
+				row := make(map[string]interface{})
+				row["0"] = "Juan"
+				row["1"] = float64(3.0)
+				testData = append(testData, row)
+				row = make(map[string]interface{})
+				row["0"] = "JuAn"
+				row["1"] = float64(4.3)
+				testData = append(testData, row)
+				row = make(map[string]interface{})
+				row["0"] = "Joaquin"
+				row["1"] = float64(7.18)
+				testData = append(testData, row)
+				row = make(map[string]interface{})
+				row["0"] = "Ezequiel"
+				row["1"] = float64(82.14)
+				testData = append(testData, row)
+				row = make(map[string]interface{})
+				row["0"] = "Marta"
+				row["1"] = float64(3.0)
+				testData = append(testData, row)
+				row = make(map[string]interface{})
+				row["0"] = "Laura"
+				row["1"] = float64(22.71)
+				testData = append(testData, row)
+
+				Expect(result.Data).To(Equal(testData))
+			})
+		})
 	})
 }
 func SimplexFunctionTest(db *gorm.DB) {

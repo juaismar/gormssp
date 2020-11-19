@@ -17,6 +17,8 @@ type User struct {
 	Candies    int
 	BirthDate  time.Time
 	Fun        bool
+	Money      float32
+	Bitcoins   float64
 }
 
 func GetDefaultData() []User {
@@ -30,6 +32,8 @@ func GetDefaultData() []User {
 			Candies:    0,
 			BirthDate:  date,
 			Fun:        true,
+			Money:      2.0,
+			Bitcoins:   3.0,
 		},
 		{
 			Name:       "JuAn",
@@ -38,6 +42,8 @@ func GetDefaultData() []User {
 			Candies:    -10,
 			BirthDate:  date,
 			Fun:        false,
+			Money:      3.1,
+			Bitcoins:   4.3,
 		},
 		{
 			Name:       "Joaquin",
@@ -46,6 +52,8 @@ func GetDefaultData() []User {
 			Candies:    10,
 			BirthDate:  date,
 			Fun:        true,
+			Money:      3.4,
+			Bitcoins:   7.18,
 		},
 		{
 			Name:       "Ezequiel",
@@ -54,6 +62,8 @@ func GetDefaultData() []User {
 			Candies:    5,
 			BirthDate:  date,
 			Fun:        false,
+			Money:      22.11,
+			Bitcoins:   82.14,
 		},
 		{
 			Name:       "Marta",
@@ -62,6 +72,8 @@ func GetDefaultData() []User {
 			Candies:    20,
 			BirthDate:  date,
 			Fun:        false,
+			Money:      2.0,
+			Bitcoins:   3.0,
 		},
 		{
 			Name:       "Laura",
@@ -70,6 +82,8 @@ func GetDefaultData() []User {
 			Candies:    110,
 			BirthDate:  date,
 			Fun:        true,
+			Money:      0.1,
+			Bitcoins:   22.71,
 		},
 	}
 }
