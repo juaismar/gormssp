@@ -14,6 +14,7 @@ var _ = Describe("Test SQLITE", func() {
 	ComplexFunctionTest(db)
 	//TODO uncoment when work
 	//RegExpTest(db)
+	TestTypes(db)
 	SimplexFunctionTest(db)
 })
 
@@ -22,6 +23,7 @@ var _ = Describe("Test POSTGRES", func() {
 
 	ComplexFunctionTest(db)
 	RegExpTest(db)
+	TestTypes(db)
 	SimplexFunctionTest(db)
 })
 

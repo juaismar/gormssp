@@ -178,36 +178,6 @@ func ComplexFunctionTest(db *gorm.DB) {
 
 			Expect(result.Data).To(Equal(testData))
 		})
-
-		It("returns a time", func() {
-
-			mapa := make(map[string]string)
-			mapa["draw"] = "62"
-			mapa["start"] = "0"
-			mapa["length"] = "1"
-			mapa["order[0][column]"] = "0"
-			mapa["order[0][dir]"] = "asc"
-
-			c := Controller{Params: mapa}
-
-			columns := make(map[int]Data)
-			columns[0] = Data{Db: "birth_date", Dt: 0, Formatter: func(
-				data interface{}, row map[string]interface{}) interface{} {
-
-				layoutISO := "2006-01-02"
-				testTime, _ := time.Parse(layoutISO, "2011-11-11")
-
-				time := data.(time.Time)
-
-				Expect(time.Equal(testTime)).To(BeTrue())
-				return data
-			}}
-			result := Simple(&c, db, "users", columns)
-
-			Expect(result.Draw).To(Equal(62))
-			Expect(result.RecordsTotal).To(Equal(6))
-			Expect(result.RecordsFiltered).To(Equal(6))
-		})
 	})
 }
 
@@ -283,9 +253,138 @@ func RegExpTest(db *gorm.DB) {
 		})
 	})
 }
+func TestTypes(db *gorm.DB) {
+	Describe("Types", func() {
+		Describe("uint", func() {
+			It("returns 2 Age 15", func() {
 
+				mapa := make(map[string]string)
+				mapa["draw"] = "64"
+				mapa["start"] = "0"
+				mapa["length"] = "10"
+				mapa["order[0][column]"] = "0"
+				mapa["order[0][dir]"] = "asc"
+
+				mapa["columns[0][data]"] = "0"
+				mapa["columns[0][searchable]"] = "true"
+				mapa["columns[0][search][value]"] = ""
+
+				mapa["columns[1][data]"] = "1"
+				mapa["columns[1][searchable]"] = "true"
+				mapa["columns[1][search][value]"] = "15"
+
+				c := Controller{Params: mapa}
+
+				columns := make(map[int]Data)
+				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
+				columns[1] = Data{Db: "age", Dt: 1, Formatter: nil}
+				result := Simple(&c, db, "users", columns)
+
+				Expect(result.Draw).To(Equal(64))
+				Expect(result.RecordsTotal).To(Equal(6))
+				Expect(result.RecordsFiltered).To(Equal(2))
+
+				testData := make([]interface{}, 0)
+				row := make(map[string]interface{})
+				row["0"] = "JuAn"
+				row["1"] = int64(15)
+				testData = append(testData, row)
+				row = make(map[string]interface{})
+				row["0"] = "Marta"
+				row["1"] = int64(15)
+				testData = append(testData, row)
+
+				Expect(result.Data).To(Equal(testData))
+			})
+		})
+		Describe("int", func() {
+			It("returns 1 Candies 10", func() {
+
+				mapa := make(map[string]string)
+				mapa["draw"] = "64"
+				mapa["start"] = "0"
+				mapa["length"] = "10"
+				mapa["order[0][column]"] = "0"
+				mapa["order[0][dir]"] = "asc"
+
+				mapa["columns[0][data]"] = "0"
+				mapa["columns[0][searchable]"] = "true"
+				mapa["columns[0][search][value]"] = ""
+
+				mapa["columns[1][data]"] = "1"
+				mapa["columns[1][searchable]"] = "true"
+				mapa["columns[1][search][value]"] = "10"
+
+				c := Controller{Params: mapa}
+
+				columns := make(map[int]Data)
+				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
+				columns[1] = Data{Db: "candies", Dt: 1, Formatter: nil}
+				result := Simple(&c, db, "users", columns)
+
+				Expect(result.Draw).To(Equal(64))
+				Expect(result.RecordsTotal).To(Equal(6))
+				Expect(result.RecordsFiltered).To(Equal(1))
+
+				testData := make([]interface{}, 0)
+				row := make(map[string]interface{})
+				row["0"] = "Joaquin"
+				row["1"] = int64(10)
+				testData = append(testData, row)
+
+				Expect(result.Data).To(Equal(testData))
+			})
+		})
+		Describe("bool", func() {
+			It("returns fun only Juan Joaquin Laura", func() {
+
+				mapa := make(map[string]string)
+				mapa["draw"] = "64"
+				mapa["start"] = "0"
+				mapa["length"] = "10"
+				mapa["order[0][column]"] = "0"
+				mapa["order[0][dir]"] = "asc"
+
+				mapa["columns[0][data]"] = "0"
+				mapa["columns[0][searchable]"] = "true"
+				mapa["columns[0][search][value]"] = ""
+
+				mapa["columns[1][data]"] = "1"
+				mapa["columns[1][searchable]"] = "true"
+				mapa["columns[1][search][value]"] = "true"
+
+				c := Controller{Params: mapa}
+
+				columns := make(map[int]Data)
+				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
+				columns[1] = Data{Db: "fun", Dt: 1, Formatter: nil}
+				result := Simple(&c, db, "users", columns)
+
+				Expect(result.Draw).To(Equal(64))
+				Expect(result.RecordsTotal).To(Equal(6))
+				Expect(result.RecordsFiltered).To(Equal(3))
+
+				testData := make([]interface{}, 0)
+				row := make(map[string]interface{})
+				row["0"] = "Juan"
+				row["1"] = true
+				testData = append(testData, row)
+				row = make(map[string]interface{})
+				row["0"] = "Joaquin"
+				row["1"] = true
+				testData = append(testData, row)
+				row = make(map[string]interface{})
+				row["0"] = "Laura"
+				row["1"] = true
+				testData = append(testData, row)
+
+				Expect(result.Data).To(Equal(testData))
+			})
+		})
+	})
+}
 func SimplexFunctionTest(db *gorm.DB) {
-	Describe("Simple", func() {
+	Describe("Simple and basic features", func() {
 		It("returns from 0 to 4", func() {
 
 			mapa := make(map[string]string)
@@ -630,132 +729,6 @@ func SimplexFunctionTest(db *gorm.DB) {
 
 			Expect(result.Data).To(Equal(testData))
 		})
-
-		//search uint
-		It("returns 2 Age 15", func() {
-
-			mapa := make(map[string]string)
-			mapa["draw"] = "64"
-			mapa["start"] = "0"
-			mapa["length"] = "10"
-			mapa["order[0][column]"] = "0"
-			mapa["order[0][dir]"] = "asc"
-
-			mapa["columns[0][data]"] = "0"
-			mapa["columns[0][searchable]"] = "true"
-			mapa["columns[0][search][value]"] = ""
-
-			mapa["columns[1][data]"] = "1"
-			mapa["columns[1][searchable]"] = "true"
-			mapa["columns[1][search][value]"] = "15"
-
-			c := Controller{Params: mapa}
-
-			columns := make(map[int]Data)
-			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-			columns[1] = Data{Db: "age", Dt: 1, Formatter: nil}
-			result := Simple(&c, db, "users", columns)
-
-			Expect(result.Draw).To(Equal(64))
-			Expect(result.RecordsTotal).To(Equal(6))
-			Expect(result.RecordsFiltered).To(Equal(2))
-
-			testData := make([]interface{}, 0)
-			row := make(map[string]interface{})
-			row["0"] = "JuAn"
-			row["1"] = int64(15)
-			testData = append(testData, row)
-			row = make(map[string]interface{})
-			row["0"] = "Marta"
-			row["1"] = int64(15)
-			testData = append(testData, row)
-
-			Expect(result.Data).To(Equal(testData))
-		})
-
-		//search int
-		It("returns 2 Age 15", func() {
-
-			mapa := make(map[string]string)
-			mapa["draw"] = "64"
-			mapa["start"] = "0"
-			mapa["length"] = "10"
-			mapa["order[0][column]"] = "0"
-			mapa["order[0][dir]"] = "asc"
-
-			mapa["columns[0][data]"] = "0"
-			mapa["columns[0][searchable]"] = "true"
-			mapa["columns[0][search][value]"] = ""
-
-			mapa["columns[1][data]"] = "1"
-			mapa["columns[1][searchable]"] = "true"
-			mapa["columns[1][search][value]"] = "10"
-
-			c := Controller{Params: mapa}
-
-			columns := make(map[int]Data)
-			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-			columns[1] = Data{Db: "candies", Dt: 1, Formatter: nil}
-			result := Simple(&c, db, "users", columns)
-
-			Expect(result.Draw).To(Equal(64))
-			Expect(result.RecordsTotal).To(Equal(6))
-			Expect(result.RecordsFiltered).To(Equal(1))
-
-			testData := make([]interface{}, 0)
-			row := make(map[string]interface{})
-			row["0"] = "Joaquin"
-			row["1"] = int64(10)
-			testData = append(testData, row)
-
-			Expect(result.Data).To(Equal(testData))
-		})
-
-		//search bool
-		It("returns fun only Juan Joaquin Laura", func() {
-
-			mapa := make(map[string]string)
-			mapa["draw"] = "64"
-			mapa["start"] = "0"
-			mapa["length"] = "10"
-			mapa["order[0][column]"] = "0"
-			mapa["order[0][dir]"] = "asc"
-
-			mapa["columns[0][data]"] = "0"
-			mapa["columns[0][searchable]"] = "true"
-			mapa["columns[0][search][value]"] = ""
-
-			mapa["columns[1][data]"] = "1"
-			mapa["columns[1][searchable]"] = "true"
-			mapa["columns[1][search][value]"] = "true"
-
-			c := Controller{Params: mapa}
-
-			columns := make(map[int]Data)
-			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-			columns[1] = Data{Db: "fun", Dt: 1, Formatter: nil}
-			result := Simple(&c, db, "users", columns)
-
-			Expect(result.Draw).To(Equal(64))
-			Expect(result.RecordsTotal).To(Equal(6))
-			Expect(result.RecordsFiltered).To(Equal(3))
-
-			testData := make([]interface{}, 0)
-			row := make(map[string]interface{})
-			row["0"] = "Juan"
-			row["1"] = true
-			testData = append(testData, row)
-			row = make(map[string]interface{})
-			row["0"] = "Joaquin"
-			row["1"] = true
-			testData = append(testData, row)
-			row = make(map[string]interface{})
-			row["0"] = "Laura"
-			row["1"] = true
-			testData = append(testData, row)
-
-			Expect(result.Data).To(Equal(testData))
-		})
 		//test format
 		It("return name whit prefix and age", func() {
 
@@ -839,6 +812,35 @@ func SimplexFunctionTest(db *gorm.DB) {
 			testData = append(testData, row)
 
 			Expect(result.Data).To(Equal(testData))
+		})
+		It("returns a time and formatter", func() {
+
+			mapa := make(map[string]string)
+			mapa["draw"] = "62"
+			mapa["start"] = "0"
+			mapa["length"] = "1"
+			mapa["order[0][column]"] = "0"
+			mapa["order[0][dir]"] = "asc"
+
+			c := Controller{Params: mapa}
+
+			columns := make(map[int]Data)
+			columns[0] = Data{Db: "birth_date", Dt: 0, Formatter: func(
+				data interface{}, row map[string]interface{}) interface{} {
+
+				layoutISO := "2006-01-02"
+				testTime, _ := time.Parse(layoutISO, "2011-11-11")
+
+				time := data.(time.Time)
+
+				Expect(time.Equal(testTime)).To(BeTrue())
+				return time
+			}}
+			result := Simple(&c, db, "users", columns)
+
+			Expect(result.Draw).To(Equal(62))
+			Expect(result.RecordsTotal).To(Equal(6))
+			Expect(result.RecordsFiltered).To(Equal(6))
 		})
 		It("Ordering by instrument desc", func() {
 
