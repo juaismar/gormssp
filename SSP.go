@@ -408,8 +408,15 @@ func bindingTypes(value string, columnsType []*sql.ColumnType, column Data, isRe
 					queryval = ""
 				}
 				return fmt.Sprintf("%s IS %s TRUE", columndb, queryval)
+			case "real", "NUMERIC":
+				fmt.Print("GORMSSP WARNING: Serarching float values, float cannot be exactly equal\n")
+				float64val, err := strconv.ParseFloat(value, 64)
+				if err != nil {
+					return ""
+				}
+				return fmt.Sprintf("%s = %f", columndb, float64val)
 			default:
-				fmt.Printf("New type %v\n", element.DatabaseTypeName())
+				fmt.Printf("GORMSSP New type %v\n", element.DatabaseTypeName())
 				return ""
 			}
 		}
@@ -454,19 +461,28 @@ func getFields(rows *sql.Rows) map[string]interface{} {
 		if strings.Contains(searching, "varchar") {
 			searching = "varchar"
 		}
-
 		switch searching {
 
 		case "string", "TEXT", "varchar", "VARCHAR":
 			value[key] = val.(string)
 		case "int32", "INT4", "integer":
 			value[key] = val.(int64)
+		case "NUMERIC", "real": // no diference between float32 and float64
+			switch vType.String() {
+			case "[]uint8":
+				value[key], _ = strconv.ParseFloat(string(val.([]uint8)), 64)
+			case "float64":
+				value[key] = val.(float64)
+			default:
+				value[key] = val
+			}
 		case "bool", "BOOL":
 			if vType.String() == "int64" {
 				value[key] = val.(int64) == 1
 			} else {
 				value[key] = val.(bool)
 			}
+
 		case "TIMESTAMPTZ", "datetime":
 			value[key] = val.(time.Time)
 		case "UUID":
@@ -476,6 +492,7 @@ func getFields(rows *sql.Rows) map[string]interface{} {
 				value[key] = val
 			}
 		default:
+			fmt.Printf("GORMSSP New type: %v for key: %v\n", searching, key)
 			value[key] = val
 		}
 
