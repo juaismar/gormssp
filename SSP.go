@@ -477,10 +477,13 @@ func getFields(rows *sql.Rows) map[string]interface{} {
 				value[key] = val
 			}
 		case "bool", "BOOL":
-			if vType.String() == "int64" {
+			switch vType.String() {
+			case "int64":
 				value[key] = val.(int64) == 1
-			} else {
+			case "bool":
 				value[key] = val.(bool)
+			default:
+				value[key] = val
 			}
 
 		case "TIMESTAMPTZ", "datetime":
