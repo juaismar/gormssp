@@ -476,7 +476,7 @@ func TestTypes(db *gorm.DB) {
 			})
 		})
 		Describe("float64", func() {
-			It("returns money only Juan Marta", func() {
+			It("returns bitcoins only Juan Marta", func() {
 
 				mapa := make(map[string]string)
 				mapa["draw"] = "64"
@@ -598,6 +598,42 @@ func TestTypes(db *gorm.DB) {
 				Expect(result.Draw).To(Equal(62))
 				Expect(result.RecordsTotal).To(Equal(6))
 				Expect(result.RecordsFiltered).To(Equal(6))
+		Describe("UUID", func() {
+			It("returns Juan", func() {
+
+				mapa := make(map[string]string)
+				mapa["draw"] = "64"
+				mapa["start"] = "0"
+				mapa["length"] = "10"
+				mapa["order[0][column]"] = "0"
+				mapa["order[0][dir]"] = "asc"
+
+				mapa["columns[0][data]"] = "0"
+				mapa["columns[0][searchable]"] = "true"
+				mapa["columns[0][search][value]"] = ""
+
+				mapa["columns[1][data]"] = "1"
+				mapa["columns[1][searchable]"] = "true"
+				mapa["columns[1][search][value]"] = "bfe44cb2-c65c-4f37-9672-8437b6718d70"
+
+				c := Controller{Params: mapa}
+
+				columns := make(map[int]Data)
+				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
+				columns[1] = Data{Db: "uuid", Dt: 1, Formatter: nil}
+				result := Simple(&c, db, "users", columns)
+
+				Expect(result.Draw).To(Equal(64))
+				Expect(result.RecordsTotal).To(Equal(6))
+				Expect(result.RecordsFiltered).To(Equal(1))
+
+				testData := make([]interface{}, 0)
+				row := make(map[string]interface{})
+				row["0"] = "Juan"
+				row["1"] = "bfe44cb2-c65c-4f37-9672-8437b6718d70"
+				testData = append(testData, row)
+
+				Expect(result.Data).To(Equal(testData))
 			})
 		})
 	})

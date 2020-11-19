@@ -395,6 +395,8 @@ func bindingTypes(value string, columnsType []*sql.ColumnType, column Data, isRe
 					return fmt.Sprintf("%s LIKE '%s'", columndb, "%"+value+"%")
 				}
 				return fmt.Sprintf("Lower(%s) LIKE '%s'", columndb, "%"+strings.ToLower(value)+"%")
+			case "UUID", "blob":
+				return fmt.Sprintf("%s = '%s'", columndb, value)
 			case "int32", "INT4", "integer", "INTEGER":
 				intval, err := strconv.Atoi(value)
 				if err != nil {
@@ -488,10 +490,13 @@ func getFields(rows *sql.Rows) map[string]interface{} {
 
 		case "TIMESTAMPTZ", "datetime":
 			value[key] = val.(time.Time)
-		case "UUID":
-			if vType.String() == "[]uint8" {
+		case "UUID", "blob":
+			switch vType.String() {
+			case "[]uint8":
 				value[key] = string(val.([]uint8))
-			} else {
+			case "uuid":
+				value[key] = val
+			default:
 				value[key] = val
 			}
 		default:
