@@ -598,6 +598,8 @@ func TestTypes(db *gorm.DB) {
 				Expect(result.Draw).To(Equal(62))
 				Expect(result.RecordsTotal).To(Equal(6))
 				Expect(result.RecordsFiltered).To(Equal(6))
+			})
+		})
 		Describe("UUID", func() {
 			It("returns Juan", func() {
 
