@@ -12,8 +12,9 @@ type User struct {
 	gorm.Model
 
 	Name       string
-	Instrument string
-	Age        int
+	Instrument string `gorm:"type:varchar(16)"`
+	Age        uint
+	Candies    int
 	BirthDate  time.Time
 	Fun        bool
 }
@@ -26,6 +27,7 @@ func GetDefaultData() []User {
 			Name:       "Juan",
 			Instrument: "Tambor",
 			Age:        10,
+			Candies:    0,
 			BirthDate:  date,
 			Fun:        true,
 		},
@@ -33,6 +35,7 @@ func GetDefaultData() []User {
 			Name:       "JuAn",
 			Instrument: "Trompeta",
 			Age:        15,
+			Candies:    -10,
 			BirthDate:  date,
 			Fun:        false,
 		},
@@ -40,6 +43,7 @@ func GetDefaultData() []User {
 			Name:       "Joaquin",
 			Instrument: "Flauta",
 			Age:        18,
+			Candies:    10,
 			BirthDate:  date,
 			Fun:        true,
 		},
@@ -47,6 +51,7 @@ func GetDefaultData() []User {
 			Name:       "Ezequiel",
 			Instrument: "Trompeta",
 			Age:        13,
+			Candies:    5,
 			BirthDate:  date,
 			Fun:        false,
 		},
@@ -54,6 +59,7 @@ func GetDefaultData() []User {
 			Name:       "Marta",
 			Instrument: "Tambor",
 			Age:        15,
+			Candies:    20,
 			BirthDate:  date,
 			Fun:        false,
 		},
@@ -61,6 +67,7 @@ func GetDefaultData() []User {
 			Name:       "Laura",
 			Instrument: "Flauta",
 			Age:        10,
+			Candies:    110,
 			BirthDate:  date,
 			Fun:        true,
 		},
