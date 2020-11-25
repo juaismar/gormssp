@@ -14,10 +14,10 @@ import (
 var dialect = ""
 
 type Data struct {
-	Db        string                                                         //name of column
-	Dt        interface{}                                                    //id of column in client (int or string)
-	Cs        bool                                                           //case sensitive - optional default false
-	Formatter func(data interface{}, row map[string]interface{}) interface{} // - optional
+	Db        string                                                                  //name of column
+	Dt        interface{}                                                             //id of column in client (int or string)
+	Cs        bool                                                                    //case sensitive - optional default false
+	Formatter func(data interface{}, row map[string]interface{}) (interface{}, error) // - optional
 }
 
 type MessageDataTable struct {
@@ -27,22 +27,20 @@ type MessageDataTable struct {
 	Data            []interface{} `json:"data,nilasempty"`
 }
 
-func Simple(c interface {
+type Controller interface {
 	GetString(string, ...string) string
-}, conn *gorm.DB,
-	table string,
+}
 
-	columns map[int]Data) MessageDataTable {
+func Simple(c Controller, conn *gorm.DB,
+	table string,
+	columns map[int]Data) (responseJSON MessageDataTable, err error) {
 
 	dialect = conn.Dialect().GetName()
 
+	responseJSON.Draw = drawNumber(c)
 	dbConfig(conn)
 
-	draw := 0
-	draw, err := strconv.Atoi(c.GetString("draw"))
-	check(err)
-
-	columnsType := initBinding(conn, table)
+	columnsType, err := initBinding(conn, table)
 
 	// Build the SQL query string from the request
 	rows, err := conn.Select("*").
@@ -52,47 +50,47 @@ func Simple(c interface {
 			order(c, columns)).
 		Table(table).
 		Rows()
+	if err != nil {
+		return
+	}
 
-	check(err)
-
-	Datas := dataOutput(columns, rows)
+	responseJSON.Data, err = dataOutput(columns, rows)
+	if err != nil {
+		return
+	}
 
 	//search in DDBB recordsFiltered
-	var recordsFiltered int
-	conn.Scopes(filterGlobal(c, columns, columnsType),
+	err = conn.Scopes(filterGlobal(c, columns, columnsType),
 		filterIndividual(c, columns, columnsType)).
 		Table(table).
-		Count(&recordsFiltered)
+		Count(&responseJSON.RecordsFiltered).Error
+	if err != nil {
+		return
+	}
 
 	//search in DDBB recordsTotal
-	var recordsTotal int
-	conn.Table(table).Count(&recordsTotal)
-
-	responseJSON := MessageDataTable{
-		Draw:            draw,
-		RecordsTotal:    recordsTotal,
-		RecordsFiltered: recordsFiltered,
-		Data:            Datas,
+	err = conn.Table(table).Count(&responseJSON.RecordsTotal).Error
+	if err != nil {
+		return
 	}
 
 	defer rows.Close()
-	return responseJSON
+	return
 }
 
-func Complex(c interface {
-	GetString(string, ...string) string
-}, conn *gorm.DB, table string, columns map[int]Data,
-	whereResult []string, whereAll []string) MessageDataTable {
+func Complex(c Controller, conn *gorm.DB, table string, columns map[int]Data,
+	whereResult []string,
+	whereAll []string) (responseJSON MessageDataTable, err error) {
 
 	dialect = conn.Dialect().GetName()
 
+	responseJSON.Draw = drawNumber(c)
 	dbConfig(conn)
 
-	draw := 0
-	draw, err := strconv.Atoi(c.GetString("draw"))
-	check(err)
-
-	columnsType := initBinding(conn, table)
+	columnsType, err := initBinding(conn, table)
+	if err != nil {
+		return
+	}
 
 	// Build the SQL query string from the request
 	whereResultFlated := flated(whereResult)
@@ -107,45 +105,53 @@ func Complex(c interface {
 		Where(whereAllFlated).
 		Table(table).
 		Rows()
+	if err != nil {
+		return
+	}
 
-	check(err)
-	Datas := dataOutput(columns, rows)
+	responseJSON.Data, err = dataOutput(columns, rows)
+	if err != nil {
+		return
+	}
 
 	//search in DDBB recordsFiltered
-	var recordsFiltered int
-	conn.Scopes(filterGlobal(c, columns, columnsType),
+	err = conn.Scopes(filterGlobal(c, columns, columnsType),
 		filterIndividual(c, columns, columnsType)).
 		Where(whereResultFlated).
 		Where(whereAllFlated).
 		Table(table).
-		Count(&recordsFiltered)
+		Count(&responseJSON.RecordsFiltered).Error
+	if err != nil {
+		return
+	}
 
 	//search in DDBB recordsTotal
-	var recordsTotal int
-	conn.Table(table).Where(whereAllFlated).Count(&recordsTotal)
-
-	responseJSON := MessageDataTable{
-		Draw:            draw,
-		RecordsTotal:    recordsTotal,
-		RecordsFiltered: recordsFiltered,
-		Data:            Datas,
+	err = conn.Table(table).Where(whereAllFlated).Count(&responseJSON.RecordsTotal).Error
+	if err != nil {
+		return
 	}
 
 	defer rows.Close()
-	return responseJSON
+	return
 }
 
-func dataOutput(columns map[int]Data, rows *sql.Rows) []interface{} {
+func dataOutput(columns map[int]Data, rows *sql.Rows) ([]interface{}, error) {
 	out := make([]interface{}, 0)
 
 	for rows.Next() {
-		fields := getFields(rows)
+		fields, err := getFields(rows)
+		if err != nil {
+			return nil, err
+		}
 
 		row := make(map[string]interface{})
 
 		for j := 0; j < len(columns); j++ {
 			column := columns[j]
 			var dt string
+			if column.Dt == nil {
+				return nil, fmt.Errorf("Bad map id, column[%v] dont exist", j)
+			}
 
 			vType := reflect.TypeOf(column.Dt)
 			if vType.String() == "string" {
@@ -157,7 +163,11 @@ func dataOutput(columns map[int]Data, rows *sql.Rows) []interface{} {
 			db := column.Db
 			// Is there a formatter?
 			if column.Formatter != nil {
-				row[dt] = column.Formatter(fields[db], fields)
+				var err error
+				row[dt], err = column.Formatter(fields[db], fields)
+				if err != nil {
+					return nil, err
+				}
 			} else {
 				row[dt] = fields[db]
 			}
@@ -166,7 +176,15 @@ func dataOutput(columns map[int]Data, rows *sql.Rows) []interface{} {
 		out = append(out, row)
 	}
 
-	return out
+	return out, nil
+}
+
+func drawNumber(c Controller) int {
+	draw, err := strconv.Atoi(c.GetString("draw"))
+	if err != nil {
+		return 0
+	}
+	return draw
 }
 
 func flated(whereArray []string) string {
@@ -181,16 +199,17 @@ func flated(whereArray []string) string {
 }
 
 //database func
-func filterGlobal(c interface {
-	GetString(string, ...string) string
-}, columns map[int]Data, columnsType []*sql.ColumnType) func(db *gorm.DB) *gorm.DB {
+func filterGlobal(c Controller, columns map[int]Data, columnsType []*sql.ColumnType) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 
 		globalSearch := ""
 		str := c.GetString("search[value]")
 		//all columns filtering
 		if str != "" {
-			requestRegex, _ := strconv.ParseBool(c.GetString("search[regex]"))
+			requestRegex, err := strconv.ParseBool(c.GetString("search[regex]"))
+			if err != nil {
+				requestRegex = false
+			}
 			var i int
 			for i = 0; ; i++ {
 				keyColumnsI := fmt.Sprintf("columns[%d][data]", i)
@@ -224,9 +243,7 @@ func filterGlobal(c interface {
 	}
 }
 
-func filterIndividual(c interface {
-	GetString(string, ...string) string
-}, columns map[int]Data, columnsType []*sql.ColumnType) func(db *gorm.DB) *gorm.DB {
+func filterIndividual(c Controller, columns map[int]Data, columnsType []*sql.ColumnType) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		// Individual column filtering
 		columnSearch := ""
@@ -248,7 +265,10 @@ func filterIndividual(c interface {
 			str := c.GetString(requestColumnQuery)
 			if columnIdx > -1 && requestColumn == "true" && str != "" {
 				requestRegexQuery := fmt.Sprintf("columns[%d][search][regex]", i)
-				requestRegex, _ := strconv.ParseBool(c.GetString(requestRegexQuery))
+				requestRegex, err := strconv.ParseBool(c.GetString(requestRegexQuery))
+				if err != nil {
+					requestRegex = false
+				}
 				query := bindingTypes(str, columnsType, columns[columnIdx], requestRegex)
 
 				if columnSearch != "" && query != "" {
@@ -268,9 +288,7 @@ func filterIndividual(c interface {
 }
 
 //Refactor this
-func order(c interface {
-	GetString(string, ...string) string
-}, columns map[int]Data) func(db *gorm.DB) *gorm.DB {
+func order(c Controller, columns map[int]Data) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 
 		if c.GetString("order[0][column]") != "" {
@@ -328,30 +346,20 @@ func checkOrderDialect(order string) string {
 	return order
 }
 
-func limit(c interface {
-	GetString(string, ...string) string
-}) func(db *gorm.DB) *gorm.DB {
+func limit(c Controller) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		start, err := strconv.Atoi(c.GetString("start"))
-		check(err)
-
-		length, err := strconv.Atoi(c.GetString("length"))
-		check(err)
-
-		if length < 0 {
-			length = 10
-		}
-		if start < 0 {
+		if err != nil || start < 0 {
 			start = 0
 		}
 
-		return db.Offset(start).Limit(length)
-	}
-}
+		length, err := strconv.Atoi(c.GetString("length"))
 
-func check(err error) {
-	if err != nil {
-		panic(err)
+		if err != nil || length < 0 {
+			length = 10
+		}
+
+		return db.Offset(start).Limit(length)
 	}
 }
 
@@ -359,7 +367,9 @@ func search(column map[int]Data, keyColumnsI string) int {
 	var i int
 	for i = 0; i < len(column); i++ {
 		data := column[i]
-
+		if data.Dt == nil {
+			continue
+		}
 		var field string
 		vType := reflect.TypeOf(data.Dt)
 		if vType.String() == "string" {
@@ -404,9 +414,9 @@ func bindingTypes(value string, columnsType []*sql.ColumnType, column Data, isRe
 				}
 				return fmt.Sprintf("%s = %d", columndb, intval)
 			case "bool", "BOOL":
-				boolval, _ := strconv.ParseBool(value)
+				boolval, err := strconv.ParseBool(value)
 				queryval := "NOT"
-				if boolval {
+				if err == nil && boolval {
 					queryval = ""
 				}
 				return fmt.Sprintf("%s IS %s TRUE", columndb, queryval)
@@ -437,10 +447,12 @@ func regExp(columndb, value string) string {
 }
 
 // https://github.com/jinzhu/gorm/issues/1167
-func getFields(rows *sql.Rows) map[string]interface{} {
+func getFields(rows *sql.Rows) (map[string]interface{}, error) {
 
 	columns, err := rows.Columns()
-	check(err)
+	if err != nil {
+		return nil, err
+	}
 
 	length := len(columns)
 	current := makeResultReceiver(length)
@@ -448,7 +460,9 @@ func getFields(rows *sql.Rows) map[string]interface{} {
 	columnsType, err := rows.ColumnTypes()
 
 	err = rows.Scan(current...)
-	check(err)
+	if err != nil {
+		return nil, err
+	}
 
 	value := make(map[string]interface{})
 	for i := 0; i < length; i++ {
@@ -472,7 +486,10 @@ func getFields(rows *sql.Rows) map[string]interface{} {
 		case "NUMERIC", "real":
 			switch vType.String() {
 			case "[]uint8":
-				value[key], _ = strconv.ParseFloat(string(val.([]uint8)), 64)
+				value[key], err = strconv.ParseFloat(string(val.([]uint8)), 64)
+				if err != nil {
+					return nil, err
+				}
 			case "float64":
 				value[key] = val.(float64)
 			default:
@@ -505,7 +522,7 @@ func getFields(rows *sql.Rows) map[string]interface{} {
 		}
 
 	}
-	return value
+	return value, nil
 }
 
 func makeResultReceiver(length int) []interface{} {
@@ -518,19 +535,23 @@ func makeResultReceiver(length int) []interface{} {
 	return result
 }
 
-func initBinding(db *gorm.DB, table string) []*sql.ColumnType {
+func initBinding(db *gorm.DB, table string) ([]*sql.ColumnType, error) {
 	rows, err := db.Select("*").
 		Table(table).
 		Limit(0).
 		Rows()
-	check(err)
+	if err != nil {
+		return nil, err
+	}
 
 	columnsType, err := rows.ColumnTypes()
 
-	check(err)
+	if err != nil {
+		return nil, err
+	}
 
 	defer rows.Close()
-	return columnsType
+	return columnsType, nil
 }
 
 func dbConfig(conn *gorm.DB) {
