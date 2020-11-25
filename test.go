@@ -11,11 +11,11 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-type Controller struct {
+type ControllerEmulated struct {
 	Params map[string]string
 }
 
-func (c *Controller) GetString(key string, def ...string) string {
+func (c *ControllerEmulated) GetString(key string, def ...string) string {
 	return c.Params[key]
 }
 
@@ -110,7 +110,7 @@ func ComplexFunctionTest(db *gorm.DB) {
 			mapa["order[0][column]"] = "0"
 			mapa["order[0][dir]"] = "asc"
 
-			c := Controller{Params: mapa}
+			c := ControllerEmulated{Params: mapa}
 
 			columns := make(map[int]Data)
 			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
@@ -120,8 +120,9 @@ func ComplexFunctionTest(db *gorm.DB) {
 			whereAll := make([]string, 0)
 			whereAll = append(whereAll, "fun IS TRUE")
 
-			result := Complex(&c, db, "users", columns, whereResult, whereAll)
+			result, err := Complex(&c, db, "users", columns, whereResult, whereAll)
 
+			Expect(err).To(BeNil())
 			Expect(result.Draw).To(Equal(62))
 			Expect(result.RecordsTotal).To(Equal(3))
 			Expect(result.RecordsFiltered).To(Equal(3))
@@ -149,7 +150,7 @@ func ComplexFunctionTest(db *gorm.DB) {
 			mapa["order[0][column]"] = "0"
 			mapa["order[0][dir]"] = "asc"
 
-			c := Controller{Params: mapa}
+			c := ControllerEmulated{Params: mapa}
 
 			columns := make(map[int]Data)
 			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
@@ -159,8 +160,9 @@ func ComplexFunctionTest(db *gorm.DB) {
 
 			whereAll := make([]string, 0)
 
-			result := Complex(&c, db, "users", columns, whereResult, whereAll)
+			result, err := Complex(&c, db, "users", columns, whereResult, whereAll)
 
+			Expect(err).To(BeNil())
 			Expect(result.Draw).To(Equal(62))
 			Expect(result.RecordsTotal).To(Equal(6))
 			Expect(result.RecordsFiltered).To(Equal(3))
@@ -198,13 +200,14 @@ func RegExpTest(db *gorm.DB) {
 			mapa["columns[0][data]"] = "0"
 			mapa["columns[0][searchable]"] = "true"
 
-			c := Controller{Params: mapa}
+			c := ControllerEmulated{Params: mapa}
 
 			columns := make(map[int]Data)
 			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
 			columns[1] = Data{Db: "instrument", Dt: 1, Formatter: nil}
-			result := Simple(&c, db, "users", columns)
+			result, err := Simple(&c, db, "users", columns)
 
+			Expect(err).To(BeNil())
 			Expect(result.Draw).To(Equal(64))
 			Expect(result.RecordsTotal).To(Equal(6))
 			Expect(result.RecordsFiltered).To(Equal(1))
@@ -231,12 +234,13 @@ func RegExpTest(db *gorm.DB) {
 			mapa["columns[0][search][value]"] = "^.{5}$"
 			mapa["columns[0][search][regex]"] = "true"
 
-			c := Controller{Params: mapa}
+			c := ControllerEmulated{Params: mapa}
 
 			columns := make(map[int]Data)
 			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-			result := Simple(&c, db, "users", columns)
+			result, err := Simple(&c, db, "users", columns)
 
+			Expect(err).To(BeNil())
 			Expect(result.Draw).To(Equal(64))
 			Expect(result.RecordsTotal).To(Equal(6))
 			Expect(result.RecordsFiltered).To(Equal(2))
@@ -273,13 +277,14 @@ func TestTypes(db *gorm.DB) {
 				mapa["columns[1][searchable]"] = "true"
 				mapa["columns[1][search][value]"] = "15"
 
-				c := Controller{Params: mapa}
+				c := ControllerEmulated{Params: mapa}
 
 				columns := make(map[int]Data)
 				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
 				columns[1] = Data{Db: "age", Dt: 1, Formatter: nil}
-				result := Simple(&c, db, "users", columns)
+				result, err := Simple(&c, db, "users", columns)
 
+				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
 				Expect(result.RecordsTotal).To(Equal(6))
 				Expect(result.RecordsFiltered).To(Equal(2))
@@ -315,13 +320,14 @@ func TestTypes(db *gorm.DB) {
 				mapa["columns[1][searchable]"] = "true"
 				mapa["columns[1][search][value]"] = "10"
 
-				c := Controller{Params: mapa}
+				c := ControllerEmulated{Params: mapa}
 
 				columns := make(map[int]Data)
 				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
 				columns[1] = Data{Db: "candies", Dt: 1, Formatter: nil}
-				result := Simple(&c, db, "users", columns)
+				result, err := Simple(&c, db, "users", columns)
 
+				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
 				Expect(result.RecordsTotal).To(Equal(6))
 				Expect(result.RecordsFiltered).To(Equal(1))
@@ -353,13 +359,14 @@ func TestTypes(db *gorm.DB) {
 				mapa["columns[1][searchable]"] = "true"
 				mapa["columns[1][search][value]"] = "true"
 
-				c := Controller{Params: mapa}
+				c := ControllerEmulated{Params: mapa}
 
 				columns := make(map[int]Data)
 				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
 				columns[1] = Data{Db: "fun", Dt: 1, Formatter: nil}
-				result := Simple(&c, db, "users", columns)
+				result, err := Simple(&c, db, "users", columns)
 
+				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
 				Expect(result.RecordsTotal).To(Equal(6))
 				Expect(result.RecordsFiltered).To(Equal(3))
@@ -399,13 +406,14 @@ func TestTypes(db *gorm.DB) {
 				mapa["columns[1][searchable]"] = "true"
 				mapa["columns[1][search][value]"] = "2.0"
 
-				c := Controller{Params: mapa}
+				c := ControllerEmulated{Params: mapa}
 
 				columns := make(map[int]Data)
 				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
 				columns[1] = Data{Db: "money", Dt: 1, Formatter: nil}
-				result := Simple(&c, db, "users", columns)
+				result, err := Simple(&c, db, "users", columns)
 
+				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
 				Expect(result.RecordsTotal).To(Equal(6))
 				Expect(result.RecordsFiltered).To(Equal(2))
@@ -435,13 +443,14 @@ func TestTypes(db *gorm.DB) {
 				mapa["columns[0][searchable]"] = "true"
 				mapa["columns[0][search][value]"] = ""
 
-				c := Controller{Params: mapa}
+				c := ControllerEmulated{Params: mapa}
 
 				columns := make(map[int]Data)
 				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
 				columns[1] = Data{Db: "money", Dt: 1, Formatter: nil}
-				result := Simple(&c, db, "users", columns)
+				result, err := Simple(&c, db, "users", columns)
 
+				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
 				Expect(result.RecordsTotal).To(Equal(6))
 				Expect(result.RecordsFiltered).To(Equal(6))
@@ -493,13 +502,14 @@ func TestTypes(db *gorm.DB) {
 				mapa["columns[1][searchable]"] = "true"
 				mapa["columns[1][search][value]"] = "3.0"
 
-				c := Controller{Params: mapa}
+				c := ControllerEmulated{Params: mapa}
 
 				columns := make(map[int]Data)
 				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
 				columns[1] = Data{Db: "bitcoins", Dt: 1, Formatter: nil}
-				result := Simple(&c, db, "users", columns)
+				result, err := Simple(&c, db, "users", columns)
 
+				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
 				Expect(result.RecordsTotal).To(Equal(6))
 				Expect(result.RecordsFiltered).To(Equal(2))
@@ -529,13 +539,14 @@ func TestTypes(db *gorm.DB) {
 				mapa["columns[0][searchable]"] = "true"
 				mapa["columns[0][search][value]"] = ""
 
-				c := Controller{Params: mapa}
+				c := ControllerEmulated{Params: mapa}
 
 				columns := make(map[int]Data)
 				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
 				columns[1] = Data{Db: "bitcoins", Dt: 1, Formatter: nil}
-				result := Simple(&c, db, "users", columns)
+				result, err := Simple(&c, db, "users", columns)
 
+				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
 				Expect(result.RecordsTotal).To(Equal(6))
 				Expect(result.RecordsFiltered).To(Equal(6))
@@ -579,22 +590,24 @@ func TestTypes(db *gorm.DB) {
 				mapa["order[0][column]"] = "0"
 				mapa["order[0][dir]"] = "asc"
 
-				c := Controller{Params: mapa}
+				c := ControllerEmulated{Params: mapa}
 
 				columns := make(map[int]Data)
 				columns[0] = Data{Db: "birth_date", Dt: 0, Formatter: func(
-					data interface{}, row map[string]interface{}) interface{} {
+					data interface{}, row map[string]interface{}) (interface{}, error) {
 
 					layoutISO := "2006-01-02"
-					testTime, _ := time.Parse(layoutISO, "2011-11-11")
+					testTime, err := time.Parse(layoutISO, "2011-11-11")
 
 					time := data.(time.Time)
 
 					Expect(time.Equal(testTime)).To(BeTrue())
-					return time
+					return time, err
 				}}
-				result := Simple(&c, db, "users", columns)
+				result, err := Simple(&c, db, "users", columns)
 
+				Expect(err).To(BeNil())
+				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(62))
 				Expect(result.RecordsTotal).To(Equal(6))
 				Expect(result.RecordsFiltered).To(Equal(6))
@@ -618,13 +631,14 @@ func TestTypes(db *gorm.DB) {
 				mapa["columns[1][searchable]"] = "true"
 				mapa["columns[1][search][value]"] = "bfe44cb2-c65c-4f37-9672-8437b6718d70"
 
-				c := Controller{Params: mapa}
+				c := ControllerEmulated{Params: mapa}
 
 				columns := make(map[int]Data)
 				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
 				columns[1] = Data{Db: "uuid", Dt: 1, Formatter: nil}
-				result := Simple(&c, db, "users", columns)
+				result, err := Simple(&c, db, "users", columns)
 
+				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
 				Expect(result.RecordsTotal).To(Equal(6))
 				Expect(result.RecordsFiltered).To(Equal(1))
@@ -651,12 +665,13 @@ func SimplexFunctionTest(db *gorm.DB) {
 			mapa["order[0][column]"] = "0"
 			mapa["order[0][dir]"] = "asc"
 
-			c := Controller{Params: mapa}
+			c := ControllerEmulated{Params: mapa}
 
 			columns := make(map[int]Data)
 			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-			result := Simple(&c, db, "users", columns)
+			result, err := Simple(&c, db, "users", columns)
 
+			Expect(err).To(BeNil())
 			Expect(result.Draw).To(Equal(62))
 			Expect(result.RecordsTotal).To(Equal(6))
 			Expect(result.RecordsFiltered).To(Equal(6))
@@ -687,12 +702,13 @@ func SimplexFunctionTest(db *gorm.DB) {
 				mapa["order[0][column]"] = "0"
 				mapa["order[0][dir]"] = "asc"
 
-				c := Controller{Params: mapa}
+				c := ControllerEmulated{Params: mapa}
 
 				columns := make(map[int]Data)
 				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-				result := Simple(&c, db, "users", columns)
+				result, err := Simple(&c, db, "users", columns)
 
+				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(62))
 				Expect(result.RecordsTotal).To(Equal(6))
 				Expect(result.RecordsFiltered).To(Equal(6))
@@ -730,12 +746,13 @@ func SimplexFunctionTest(db *gorm.DB) {
 				mapa["order[0][column]"] = "0"
 				mapa["order[0][dir]"] = "asc"
 
-				c := Controller{Params: mapa}
+				c := ControllerEmulated{Params: mapa}
 
 				columns := make(map[int]Data)
 				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-				result := Simple(&c, db, "users", columns)
+				result, err := Simple(&c, db, "users", columns)
 
+				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(62))
 				Expect(result.RecordsTotal).To(Equal(6))
 				Expect(result.RecordsFiltered).To(Equal(6))
@@ -767,12 +784,13 @@ func SimplexFunctionTest(db *gorm.DB) {
 				mapa["order[0][column]"] = "0"
 				mapa["order[0][dir]"] = "asc"
 
-				c := Controller{Params: mapa}
+				c := ControllerEmulated{Params: mapa}
 
 				columns := make(map[int]Data)
 				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-				result := Simple(&c, db, "users", columns)
+				result, err := Simple(&c, db, "users", columns)
 
+				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(63))
 				Expect(result.RecordsTotal).To(Equal(6))
 				Expect(result.RecordsFiltered).To(Equal(6))
@@ -818,14 +836,15 @@ func SimplexFunctionTest(db *gorm.DB) {
 				mapa["columns[2][searchable]"] = "true"
 				mapa["columns[2][search][value]"] = ""
 
-				c := Controller{Params: mapa}
+				c := ControllerEmulated{Params: mapa}
 
 				columns := make(map[int]Data)
 				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
 				columns[1] = Data{Db: "instrument", Dt: 1, Formatter: nil}
 				columns[2] = Data{Db: "age", Dt: 2, Formatter: nil}
-				result := Simple(&c, db, "users", columns)
+				result, err := Simple(&c, db, "users", columns)
 
+				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
 				Expect(result.RecordsTotal).To(Equal(6))
 				Expect(result.RecordsFiltered).To(Equal(2))
@@ -859,12 +878,13 @@ func SimplexFunctionTest(db *gorm.DB) {
 				mapa["columns[supername][searchable]"] = "true"
 				mapa["columns[supername][search][value]"] = ""
 
-				c := Controller{Params: mapa}
+				c := ControllerEmulated{Params: mapa}
 
 				columns := make(map[int]Data)
 				columns[0] = Data{Db: "name", Dt: "supername", Formatter: nil}
-				result := Simple(&c, db, "users", columns)
+				result, err := Simple(&c, db, "users", columns)
 
+				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
 				Expect(result.RecordsTotal).To(Equal(6))
 				Expect(result.RecordsFiltered).To(Equal(6))
@@ -901,13 +921,14 @@ func SimplexFunctionTest(db *gorm.DB) {
 				mapa["columns[1][searchable]"] = "true"
 				mapa["columns[1][search][value]"] = ""
 
-				c := Controller{Params: mapa}
+				c := ControllerEmulated{Params: mapa}
 
 				columns := make(map[int]Data)
 				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
 				columns[1] = Data{Db: "instrument", Dt: 1, Formatter: nil}
-				result := Simple(&c, db, "users", columns)
+				result, err := Simple(&c, db, "users", columns)
 
+				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
 				Expect(result.RecordsTotal).To(Equal(6))
 				Expect(result.RecordsFiltered).To(Equal(2))
@@ -939,13 +960,14 @@ func SimplexFunctionTest(db *gorm.DB) {
 				mapa["columns[0][searchable]"] = "true"
 				mapa["columns[0][search][value]"] = "ambor"
 
-				c := Controller{Params: mapa}
+				c := ControllerEmulated{Params: mapa}
 
 				columns := make(map[int]Data)
 				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
 				columns[1] = Data{Db: "instrument", Dt: 1, Formatter: nil}
-				result := Simple(&c, db, "users", columns)
+				result, err := Simple(&c, db, "users", columns)
 
+				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
 				Expect(result.RecordsTotal).To(Equal(6))
 				Expect(result.RecordsFiltered).To(Equal(2))
@@ -977,12 +999,13 @@ func SimplexFunctionTest(db *gorm.DB) {
 				mapa["columns[0][searchable]"] = "true"
 				mapa["columns[0][search][value]"] = "uAn"
 
-				c := Controller{Params: mapa}
+				c := ControllerEmulated{Params: mapa}
 
 				columns := make(map[int]Data)
 				columns[0] = Data{Db: "name", Dt: 0, Cs: true, Formatter: nil}
-				result := Simple(&c, db, "users", columns)
+				result, err := Simple(&c, db, "users", columns)
 
+				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
 				Expect(result.RecordsTotal).To(Equal(6))
 				Expect(result.RecordsFiltered).To(Equal(1))
@@ -1005,16 +1028,17 @@ func SimplexFunctionTest(db *gorm.DB) {
 				mapa["order[0][column]"] = "0"
 				mapa["order[0][dir]"] = "asc"
 
-				c := Controller{Params: mapa}
+				c := ControllerEmulated{Params: mapa}
 
 				columns := make(map[int]Data)
 				columns[0] = Data{Db: "name", Dt: 0, Formatter: func(
-					data interface{}, row map[string]interface{}) interface{} {
-					return fmt.Sprintf("PREFIX_%v_%v", data, row["age"])
+					data interface{}, row map[string]interface{}) (interface{}, error) {
+					return fmt.Sprintf("PREFIX_%v_%v", data, row["age"]), nil
 				}}
 
-				result := Simple(&c, db, "users", columns)
+				result, err := Simple(&c, db, "users", columns)
 
+				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(62))
 				Expect(result.RecordsTotal).To(Equal(6))
 				Expect(result.RecordsFiltered).To(Equal(6))
@@ -1057,13 +1081,14 @@ func SimplexFunctionTest(db *gorm.DB) {
 			mapa["columns[1][orderable]"] = "true"
 			mapa["columns[1][search][value]"] = ""
 
-			c := Controller{Params: mapa}
+			c := ControllerEmulated{Params: mapa}
 
 			columns := make(map[int]Data)
 			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
 			columns[1] = Data{Db: "instrument", Dt: 1, Formatter: nil}
-			result := Simple(&c, db, "users", columns)
+			result, err := Simple(&c, db, "users", columns)
 
+			Expect(err).To(BeNil())
 			Expect(result.Draw).To(Equal(64))
 			Expect(result.RecordsTotal).To(Equal(6))
 			Expect(result.RecordsFiltered).To(Equal(2))
@@ -1101,13 +1126,14 @@ func SimplexFunctionTest(db *gorm.DB) {
 			mapa["columns[1][orderable]"] = "true"
 			mapa["columns[1][search][value]"] = ""
 
-			c := Controller{Params: mapa}
+			c := ControllerEmulated{Params: mapa}
 
 			columns := make(map[int]Data)
 			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
 			columns[1] = Data{Db: "instrument", Dt: 1, Formatter: nil}
-			result := Simple(&c, db, "users", columns)
+			result, err := Simple(&c, db, "users", columns)
 
+			Expect(err).To(BeNil())
 			Expect(result.Draw).To(Equal(64))
 			Expect(result.RecordsTotal).To(Equal(6))
 			Expect(result.RecordsFiltered).To(Equal(2))
@@ -1123,6 +1149,87 @@ func SimplexFunctionTest(db *gorm.DB) {
 			testData = append(testData, row)
 
 			Expect(result.Data).To(Equal(testData))
+		})
+	})
+}
+func Errors(db *gorm.DB) {
+	Describe("Column not found", func() {
+		It("Return error", func() {
+
+			mapa := make(map[string]string)
+			mapa["draw"] = "64"
+			mapa["start"] = "0"
+			mapa["length"] = "2"
+			mapa["order[0][column]"] = "1"
+			mapa["order[0][dir]"] = "desc"
+
+			mapa["columns[0][data]"] = "0"
+			mapa["columns[0][searchable]"] = "true"
+
+			c := ControllerEmulated{Params: mapa}
+
+			columns := make(map[int]Data)
+			columns[0] = Data{Db: "bike", Dt: 0, Formatter: nil}
+			result, err := Simple(&c, db, "users", columns)
+
+			Expect(err).To(BeNil())
+
+			testData := make([]interface{}, 0)
+			row := make(map[string]interface{})
+			row["0"] = nil
+			testData = append(testData, row)
+			row = make(map[string]interface{})
+			row["0"] = nil
+			testData = append(testData, row)
+
+			Expect(result.Data).To(Equal(testData))
+		})
+	})
+	Describe("Bad map id", func() {
+		It("Return error", func() {
+
+			mapa := make(map[string]string)
+			mapa["draw"] = "64"
+			mapa["start"] = "0"
+			mapa["length"] = "2"
+			mapa["order[0][column]"] = "1"
+			mapa["order[0][dir]"] = "desc"
+
+			mapa["columns[0][data]"] = "0"
+			mapa["columns[0][searchable]"] = "true"
+
+			c := ControllerEmulated{Params: mapa}
+
+			columns := make(map[int]Data)
+			columns[1] = Data{Db: "bike", Dt: 0, Formatter: nil}
+			_, err := Simple(&c, db, "users", columns)
+
+			Expect(fmt.Sprintf("%v", err)).To(Equal("Bad map id, column[0] dont exist"))
+		})
+	})
+	Describe("Format error", func() {
+		It("return name whit prefix and age", func() {
+
+			mapa := make(map[string]string)
+			mapa["draw"] = "62"
+			mapa["start"] = "0"
+			mapa["length"] = "4"
+			mapa["order[0][column]"] = "0"
+			mapa["order[0][dir]"] = "asc"
+
+			c := ControllerEmulated{Params: mapa}
+
+			columns := make(map[int]Data)
+			columns[0] = Data{Db: "name", Dt: 0, Formatter: func(
+				data interface{}, row map[string]interface{}) (interface{}, error) {
+				layout := "2006-01-02T15:04:05.000Z"
+				//try convert name to date
+				return time.Parse(layout, data.(string))
+			}}
+
+			_, err := Simple(&c, db, "users", columns)
+
+			Expect(err).ToNot(BeNil())
 		})
 	})
 }
