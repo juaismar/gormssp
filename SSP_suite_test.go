@@ -1,4 +1,4 @@
-package SSP_test
+package ssp_test
 
 import (
 	"testing"

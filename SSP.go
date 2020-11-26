@@ -1,4 +1,4 @@
-package SSP
+package ssp
 
 import (
 	"database/sql"
@@ -13,6 +13,7 @@ import (
 
 var dialect = ""
 
+// Data is a line in map that link the database field with datatable field
 type Data struct {
 	Db        string                                                                  //name of column
 	Dt        interface{}                                                             //id of column in client (int or string)
@@ -20,6 +21,7 @@ type Data struct {
 	Formatter func(data interface{}, row map[string]interface{}) (interface{}, error) // - optional
 }
 
+// MessageDataTable is theresponse object
 type MessageDataTable struct {
 	Draw            int           `json:"draw"`
 	RecordsTotal    int           `json:"recordsTotal"`
@@ -27,10 +29,12 @@ type MessageDataTable struct {
 	Data            []interface{} `json:"data,nilasempty"`
 }
 
+// Controller emulate the beego controller
 type Controller interface {
 	GetString(string, ...string) string
 }
 
+// Simple is a main method, externally called
 func Simple(c Controller, conn *gorm.DB,
 	table string,
 	columns map[int]Data) (responseJSON MessageDataTable, err error) {
@@ -78,6 +82,7 @@ func Simple(c Controller, conn *gorm.DB,
 	return
 }
 
+// Complex is a main method, externally called
 func Complex(c Controller, conn *gorm.DB, table string, columns map[int]Data,
 	whereResult []string,
 	whereAll []string) (responseJSON MessageDataTable, err error) {
@@ -338,9 +343,8 @@ func checkOrderDialect(order string) string {
 	if dialect == "sqlite3" {
 		if order == "asc" {
 			return "desc"
-		} else {
-			return "asc"
 		}
+		return "asc"
 	}
 
 	return order
@@ -440,10 +444,8 @@ func regExp(columndb, value string) string {
 	if dialect == "sqlite3" {
 		//TODO make regexp
 		return fmt.Sprintf("Lower(%s) LIKE '%s'", columndb, "%"+strings.ToLower(value)+"%")
-	} else {
-		return fmt.Sprintf("%s ~* '%s'", columndb, value)
 	}
-
+	return fmt.Sprintf("%s ~* '%s'", columndb, value)
 }
 
 // https://github.com/jinzhu/gorm/issues/1167

@@ -1,4 +1,4 @@
-package SSP
+package ssp_test
 
 import (
 	"github.com/juaismar/gormssp/test/dbs/postgres"
@@ -14,8 +14,8 @@ var _ = Describe("Test SQLITE", func() {
 	ComplexFunctionTest(db)
 	//TODO uncoment when work
 	//RegExpTest(db)
-	TestTypes(db)
-	SimplexFunctionTest(db)
+	Types(db)
+	SimpleFunctionTest(db)
 	//TODO test id "INTEGER" type
 	Errors(db)
 })
@@ -25,8 +25,8 @@ var _ = Describe("Test POSTGRES", func() {
 
 	ComplexFunctionTest(db)
 	RegExpTest(db)
-	TestTypes(db)
-	SimplexFunctionTest(db)
+	Types(db)
+	SimpleFunctionTest(db)
 	Errors(db)
 })
 

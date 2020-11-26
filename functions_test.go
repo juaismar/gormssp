@@ -1,31 +1,34 @@
-package SSP
+package ssp_test
 
 import (
 	"fmt"
 	"time"
 
 	"github.com/jinzhu/gorm"
+	ssp "github.com/juaismar/gormssp"
 
-	_ "github.com/lib/pq"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 )
 
+// ControllerEmulated emulate the beego controller
 type ControllerEmulated struct {
 	Params map[string]string
 }
 
+// GetString emulate the beego controoller method
 func (c *ControllerEmulated) GetString(key string, def ...string) string {
 	return c.Params[key]
 }
 
+// FunctionsTest internal function test
 func FunctionsTest() {
 	Describe("flated", func() {
 		It("returns Empty", func() {
 
 			var whereArray []string
 
-			result := flated(whereArray)
+			result := ssp.Flated(whereArray)
 
 			Expect(result).To(Equal(""))
 		})
@@ -34,7 +37,7 @@ func FunctionsTest() {
 			var whereArray []string
 			whereArray = append(whereArray, "number = 1")
 
-			result := flated(whereArray)
+			result := ssp.Flated(whereArray)
 
 			Expect(result).To(Equal("number = 1"))
 		})
@@ -44,7 +47,7 @@ func FunctionsTest() {
 			whereArray = append(whereArray, "number = 1")
 			whereArray = append(whereArray, "name = 'John'")
 
-			result := flated(whereArray)
+			result := ssp.Flated(whereArray)
 
 			Expect(result).To(Equal("number = 1 AND name = 'John'"))
 		})
@@ -52,45 +55,45 @@ func FunctionsTest() {
 	Describe("search", func() {
 		It("returns -1", func() {
 
-			columns := make(map[int]Data)
-			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-			columns[1] = Data{Db: "role", Dt: "role", Formatter: nil}
-			columns[2] = Data{Db: "email", Dt: 2, Formatter: nil}
+			columns := make(map[int]ssp.Data)
+			columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+			columns[1] = ssp.Data{Db: "role", Dt: "role", Formatter: nil}
+			columns[2] = ssp.Data{Db: "email", Dt: 2, Formatter: nil}
 
-			result := search(columns, "")
+			result := ssp.Search(columns, "")
 
 			Expect(result).To(Equal(-1))
 		})
 		It("returns -1", func() {
 
-			columns := make(map[int]Data)
-			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-			columns[1] = Data{Db: "role", Dt: "role", Formatter: nil}
-			columns[2] = Data{Db: "email", Dt: 2, Formatter: nil}
+			columns := make(map[int]ssp.Data)
+			columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+			columns[1] = ssp.Data{Db: "role", Dt: "role", Formatter: nil}
+			columns[2] = ssp.Data{Db: "email", Dt: 2, Formatter: nil}
 
-			result := search(columns, "instrument")
+			result := ssp.Search(columns, "instrument")
 
 			Expect(result).To(Equal(-1))
 		})
 		It("returns 1", func() {
 
-			columns := make(map[int]Data)
-			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-			columns[1] = Data{Db: "role", Dt: "role", Formatter: nil}
-			columns[2] = Data{Db: "email", Dt: 2, Formatter: nil}
+			columns := make(map[int]ssp.Data)
+			columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+			columns[1] = ssp.Data{Db: "role", Dt: "role", Formatter: nil}
+			columns[2] = ssp.Data{Db: "email", Dt: 2, Formatter: nil}
 
-			result := search(columns, "role")
+			result := ssp.Search(columns, "role")
 
 			Expect(result).To(Equal(1))
 		})
 		It("returns 0", func() {
 
-			columns := make(map[int]Data)
-			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-			columns[1] = Data{Db: "role", Dt: "role", Formatter: nil}
-			columns[2] = Data{Db: "email", Dt: 2, Formatter: nil}
+			columns := make(map[int]ssp.Data)
+			columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+			columns[1] = ssp.Data{Db: "role", Dt: "role", Formatter: nil}
+			columns[2] = ssp.Data{Db: "email", Dt: 2, Formatter: nil}
 
-			result := search(columns, "0")
+			result := ssp.Search(columns, "0")
 
 			Expect(result).To(Equal(0))
 		})
@@ -98,6 +101,7 @@ func FunctionsTest() {
 	})
 }
 
+// ComplexFunctionTest test for Complex method
 func ComplexFunctionTest(db *gorm.DB) {
 	Describe("Complex", func() {
 		//filter whereall (where in all queries)
@@ -112,15 +116,15 @@ func ComplexFunctionTest(db *gorm.DB) {
 
 			c := ControllerEmulated{Params: mapa}
 
-			columns := make(map[int]Data)
-			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
+			columns := make(map[int]ssp.Data)
+			columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
 
 			whereResult := make([]string, 0)
 
 			whereAll := make([]string, 0)
 			whereAll = append(whereAll, "fun IS TRUE")
 
-			result, err := Complex(&c, db, "users", columns, whereResult, whereAll)
+			result, err := ssp.Complex(&c, db, "users", columns, whereResult, whereAll)
 
 			Expect(err).To(BeNil())
 			Expect(result.Draw).To(Equal(62))
@@ -152,15 +156,15 @@ func ComplexFunctionTest(db *gorm.DB) {
 
 			c := ControllerEmulated{Params: mapa}
 
-			columns := make(map[int]Data)
-			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
+			columns := make(map[int]ssp.Data)
+			columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
 
 			whereResult := make([]string, 0)
 			whereResult = append(whereResult, "fun IS TRUE")
 
 			whereAll := make([]string, 0)
 
-			result, err := Complex(&c, db, "users", columns, whereResult, whereAll)
+			result, err := ssp.Complex(&c, db, "users", columns, whereResult, whereAll)
 
 			Expect(err).To(BeNil())
 			Expect(result.Draw).To(Equal(62))
@@ -183,6 +187,7 @@ func ComplexFunctionTest(db *gorm.DB) {
 	})
 }
 
+// RegExpTest test for regular expresions
 func RegExpTest(db *gorm.DB) {
 	Describe("RegExp", func() {
 		It("Global search regex", func() {
@@ -202,10 +207,10 @@ func RegExpTest(db *gorm.DB) {
 
 			c := ControllerEmulated{Params: mapa}
 
-			columns := make(map[int]Data)
-			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-			columns[1] = Data{Db: "instrument", Dt: 1, Formatter: nil}
-			result, err := Simple(&c, db, "users", columns)
+			columns := make(map[int]ssp.Data)
+			columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+			columns[1] = ssp.Data{Db: "instrument", Dt: 1, Formatter: nil}
+			result, err := ssp.Simple(&c, db, "users", columns)
 
 			Expect(err).To(BeNil())
 			Expect(result.Draw).To(Equal(64))
@@ -236,9 +241,9 @@ func RegExpTest(db *gorm.DB) {
 
 			c := ControllerEmulated{Params: mapa}
 
-			columns := make(map[int]Data)
-			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-			result, err := Simple(&c, db, "users", columns)
+			columns := make(map[int]ssp.Data)
+			columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+			result, err := ssp.Simple(&c, db, "users", columns)
 
 			Expect(err).To(BeNil())
 			Expect(result.Draw).To(Equal(64))
@@ -257,7 +262,9 @@ func RegExpTest(db *gorm.DB) {
 		})
 	})
 }
-func TestTypes(db *gorm.DB) {
+
+// Types test for types
+func Types(db *gorm.DB) {
 	Describe("Types", func() {
 		Describe("uint", func() {
 			It("returns 2 Age 15", func() {
@@ -279,10 +286,10 @@ func TestTypes(db *gorm.DB) {
 
 				c := ControllerEmulated{Params: mapa}
 
-				columns := make(map[int]Data)
-				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-				columns[1] = Data{Db: "age", Dt: 1, Formatter: nil}
-				result, err := Simple(&c, db, "users", columns)
+				columns := make(map[int]ssp.Data)
+				columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+				columns[1] = ssp.Data{Db: "age", Dt: 1, Formatter: nil}
+				result, err := ssp.Simple(&c, db, "users", columns)
 
 				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
@@ -322,10 +329,10 @@ func TestTypes(db *gorm.DB) {
 
 				c := ControllerEmulated{Params: mapa}
 
-				columns := make(map[int]Data)
-				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-				columns[1] = Data{Db: "candies", Dt: 1, Formatter: nil}
-				result, err := Simple(&c, db, "users", columns)
+				columns := make(map[int]ssp.Data)
+				columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+				columns[1] = ssp.Data{Db: "candies", Dt: 1, Formatter: nil}
+				result, err := ssp.Simple(&c, db, "users", columns)
 
 				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
@@ -361,10 +368,10 @@ func TestTypes(db *gorm.DB) {
 
 				c := ControllerEmulated{Params: mapa}
 
-				columns := make(map[int]Data)
-				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-				columns[1] = Data{Db: "fun", Dt: 1, Formatter: nil}
-				result, err := Simple(&c, db, "users", columns)
+				columns := make(map[int]ssp.Data)
+				columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+				columns[1] = ssp.Data{Db: "fun", Dt: 1, Formatter: nil}
+				result, err := ssp.Simple(&c, db, "users", columns)
 
 				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
@@ -408,10 +415,10 @@ func TestTypes(db *gorm.DB) {
 
 				c := ControllerEmulated{Params: mapa}
 
-				columns := make(map[int]Data)
-				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-				columns[1] = Data{Db: "money", Dt: 1, Formatter: nil}
-				result, err := Simple(&c, db, "users", columns)
+				columns := make(map[int]ssp.Data)
+				columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+				columns[1] = ssp.Data{Db: "money", Dt: 1, Formatter: nil}
+				result, err := ssp.Simple(&c, db, "users", columns)
 
 				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
@@ -445,10 +452,10 @@ func TestTypes(db *gorm.DB) {
 
 				c := ControllerEmulated{Params: mapa}
 
-				columns := make(map[int]Data)
-				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-				columns[1] = Data{Db: "money", Dt: 1, Formatter: nil}
-				result, err := Simple(&c, db, "users", columns)
+				columns := make(map[int]ssp.Data)
+				columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+				columns[1] = ssp.Data{Db: "money", Dt: 1, Formatter: nil}
+				result, err := ssp.Simple(&c, db, "users", columns)
 
 				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
@@ -504,10 +511,10 @@ func TestTypes(db *gorm.DB) {
 
 				c := ControllerEmulated{Params: mapa}
 
-				columns := make(map[int]Data)
-				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-				columns[1] = Data{Db: "bitcoins", Dt: 1, Formatter: nil}
-				result, err := Simple(&c, db, "users", columns)
+				columns := make(map[int]ssp.Data)
+				columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+				columns[1] = ssp.Data{Db: "bitcoins", Dt: 1, Formatter: nil}
+				result, err := ssp.Simple(&c, db, "users", columns)
 
 				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
@@ -541,10 +548,10 @@ func TestTypes(db *gorm.DB) {
 
 				c := ControllerEmulated{Params: mapa}
 
-				columns := make(map[int]Data)
-				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-				columns[1] = Data{Db: "bitcoins", Dt: 1, Formatter: nil}
-				result, err := Simple(&c, db, "users", columns)
+				columns := make(map[int]ssp.Data)
+				columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+				columns[1] = ssp.Data{Db: "bitcoins", Dt: 1, Formatter: nil}
+				result, err := ssp.Simple(&c, db, "users", columns)
 
 				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
@@ -592,8 +599,8 @@ func TestTypes(db *gorm.DB) {
 
 				c := ControllerEmulated{Params: mapa}
 
-				columns := make(map[int]Data)
-				columns[0] = Data{Db: "birth_date", Dt: 0, Formatter: func(
+				columns := make(map[int]ssp.Data)
+				columns[0] = ssp.Data{Db: "birth_date", Dt: 0, Formatter: func(
 					data interface{}, row map[string]interface{}) (interface{}, error) {
 
 					layoutISO := "2006-01-02"
@@ -604,7 +611,7 @@ func TestTypes(db *gorm.DB) {
 					Expect(time.Equal(testTime)).To(BeTrue())
 					return time, err
 				}}
-				result, err := Simple(&c, db, "users", columns)
+				result, err := ssp.Simple(&c, db, "users", columns)
 
 				Expect(err).To(BeNil())
 				Expect(err).To(BeNil())
@@ -633,10 +640,10 @@ func TestTypes(db *gorm.DB) {
 
 				c := ControllerEmulated{Params: mapa}
 
-				columns := make(map[int]Data)
-				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-				columns[1] = Data{Db: "uuid", Dt: 1, Formatter: nil}
-				result, err := Simple(&c, db, "users", columns)
+				columns := make(map[int]ssp.Data)
+				columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+				columns[1] = ssp.Data{Db: "uuid", Dt: 1, Formatter: nil}
+				result, err := ssp.Simple(&c, db, "users", columns)
 
 				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
@@ -654,7 +661,9 @@ func TestTypes(db *gorm.DB) {
 		})
 	})
 }
-func SimplexFunctionTest(db *gorm.DB) {
+
+// SimpleFunctionTest test for ssp.Simplex method
+func SimpleFunctionTest(db *gorm.DB) {
 	Describe("Simple and basic features", func() {
 		It("returns from 0 to 4", func() {
 
@@ -667,9 +676,9 @@ func SimplexFunctionTest(db *gorm.DB) {
 
 			c := ControllerEmulated{Params: mapa}
 
-			columns := make(map[int]Data)
-			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-			result, err := Simple(&c, db, "users", columns)
+			columns := make(map[int]ssp.Data)
+			columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+			result, err := ssp.Simple(&c, db, "users", columns)
 
 			Expect(err).To(BeNil())
 			Expect(result.Draw).To(Equal(62))
@@ -704,9 +713,9 @@ func SimplexFunctionTest(db *gorm.DB) {
 
 				c := ControllerEmulated{Params: mapa}
 
-				columns := make(map[int]Data)
-				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-				result, err := Simple(&c, db, "users", columns)
+				columns := make(map[int]ssp.Data)
+				columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+				result, err := ssp.Simple(&c, db, "users", columns)
 
 				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(62))
@@ -748,9 +757,9 @@ func SimplexFunctionTest(db *gorm.DB) {
 
 				c := ControllerEmulated{Params: mapa}
 
-				columns := make(map[int]Data)
-				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-				result, err := Simple(&c, db, "users", columns)
+				columns := make(map[int]ssp.Data)
+				columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+				result, err := ssp.Simple(&c, db, "users", columns)
 
 				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(62))
@@ -786,9 +795,9 @@ func SimplexFunctionTest(db *gorm.DB) {
 
 				c := ControllerEmulated{Params: mapa}
 
-				columns := make(map[int]Data)
-				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-				result, err := Simple(&c, db, "users", columns)
+				columns := make(map[int]ssp.Data)
+				columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+				result, err := ssp.Simple(&c, db, "users", columns)
 
 				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(63))
@@ -838,11 +847,11 @@ func SimplexFunctionTest(db *gorm.DB) {
 
 				c := ControllerEmulated{Params: mapa}
 
-				columns := make(map[int]Data)
-				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-				columns[1] = Data{Db: "instrument", Dt: 1, Formatter: nil}
-				columns[2] = Data{Db: "age", Dt: 2, Formatter: nil}
-				result, err := Simple(&c, db, "users", columns)
+				columns := make(map[int]ssp.Data)
+				columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+				columns[1] = ssp.Data{Db: "instrument", Dt: 1, Formatter: nil}
+				columns[2] = ssp.Data{Db: "age", Dt: 2, Formatter: nil}
+				result, err := ssp.Simple(&c, db, "users", columns)
 
 				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
@@ -880,9 +889,9 @@ func SimplexFunctionTest(db *gorm.DB) {
 
 				c := ControllerEmulated{Params: mapa}
 
-				columns := make(map[int]Data)
-				columns[0] = Data{Db: "name", Dt: "supername", Formatter: nil}
-				result, err := Simple(&c, db, "users", columns)
+				columns := make(map[int]ssp.Data)
+				columns[0] = ssp.Data{Db: "name", Dt: "supername", Formatter: nil}
+				result, err := ssp.Simple(&c, db, "users", columns)
 
 				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
@@ -923,10 +932,10 @@ func SimplexFunctionTest(db *gorm.DB) {
 
 				c := ControllerEmulated{Params: mapa}
 
-				columns := make(map[int]Data)
-				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-				columns[1] = Data{Db: "instrument", Dt: 1, Formatter: nil}
-				result, err := Simple(&c, db, "users", columns)
+				columns := make(map[int]ssp.Data)
+				columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+				columns[1] = ssp.Data{Db: "instrument", Dt: 1, Formatter: nil}
+				result, err := ssp.Simple(&c, db, "users", columns)
 
 				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
@@ -962,10 +971,10 @@ func SimplexFunctionTest(db *gorm.DB) {
 
 				c := ControllerEmulated{Params: mapa}
 
-				columns := make(map[int]Data)
-				columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-				columns[1] = Data{Db: "instrument", Dt: 1, Formatter: nil}
-				result, err := Simple(&c, db, "users", columns)
+				columns := make(map[int]ssp.Data)
+				columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+				columns[1] = ssp.Data{Db: "instrument", Dt: 1, Formatter: nil}
+				result, err := ssp.Simple(&c, db, "users", columns)
 
 				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
@@ -1001,9 +1010,9 @@ func SimplexFunctionTest(db *gorm.DB) {
 
 				c := ControllerEmulated{Params: mapa}
 
-				columns := make(map[int]Data)
-				columns[0] = Data{Db: "name", Dt: 0, Cs: true, Formatter: nil}
-				result, err := Simple(&c, db, "users", columns)
+				columns := make(map[int]ssp.Data)
+				columns[0] = ssp.Data{Db: "name", Dt: 0, Cs: true, Formatter: nil}
+				result, err := ssp.Simple(&c, db, "users", columns)
 
 				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
@@ -1030,13 +1039,13 @@ func SimplexFunctionTest(db *gorm.DB) {
 
 				c := ControllerEmulated{Params: mapa}
 
-				columns := make(map[int]Data)
-				columns[0] = Data{Db: "name", Dt: 0, Formatter: func(
+				columns := make(map[int]ssp.Data)
+				columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: func(
 					data interface{}, row map[string]interface{}) (interface{}, error) {
 					return fmt.Sprintf("PREFIX_%v_%v", data, row["age"]), nil
 				}}
 
-				result, err := Simple(&c, db, "users", columns)
+				result, err := ssp.Simple(&c, db, "users", columns)
 
 				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(62))
@@ -1083,10 +1092,10 @@ func SimplexFunctionTest(db *gorm.DB) {
 
 			c := ControllerEmulated{Params: mapa}
 
-			columns := make(map[int]Data)
-			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-			columns[1] = Data{Db: "instrument", Dt: 1, Formatter: nil}
-			result, err := Simple(&c, db, "users", columns)
+			columns := make(map[int]ssp.Data)
+			columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+			columns[1] = ssp.Data{Db: "instrument", Dt: 1, Formatter: nil}
+			result, err := ssp.Simple(&c, db, "users", columns)
 
 			Expect(err).To(BeNil())
 			Expect(result.Draw).To(Equal(64))
@@ -1128,10 +1137,10 @@ func SimplexFunctionTest(db *gorm.DB) {
 
 			c := ControllerEmulated{Params: mapa}
 
-			columns := make(map[int]Data)
-			columns[0] = Data{Db: "name", Dt: 0, Formatter: nil}
-			columns[1] = Data{Db: "instrument", Dt: 1, Formatter: nil}
-			result, err := Simple(&c, db, "users", columns)
+			columns := make(map[int]ssp.Data)
+			columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+			columns[1] = ssp.Data{Db: "instrument", Dt: 1, Formatter: nil}
+			result, err := ssp.Simple(&c, db, "users", columns)
 
 			Expect(err).To(BeNil())
 			Expect(result.Draw).To(Equal(64))
@@ -1152,6 +1161,8 @@ func SimplexFunctionTest(db *gorm.DB) {
 		})
 	})
 }
+
+// Errors test some errors
 func Errors(db *gorm.DB) {
 	Describe("Column not found", func() {
 		It("Return error", func() {
@@ -1168,9 +1179,9 @@ func Errors(db *gorm.DB) {
 
 			c := ControllerEmulated{Params: mapa}
 
-			columns := make(map[int]Data)
-			columns[0] = Data{Db: "bike", Dt: 0, Formatter: nil}
-			result, err := Simple(&c, db, "users", columns)
+			columns := make(map[int]ssp.Data)
+			columns[0] = ssp.Data{Db: "bike", Dt: 0, Formatter: nil}
+			result, err := ssp.Simple(&c, db, "users", columns)
 
 			Expect(err).To(BeNil())
 
@@ -1200,9 +1211,9 @@ func Errors(db *gorm.DB) {
 
 			c := ControllerEmulated{Params: mapa}
 
-			columns := make(map[int]Data)
-			columns[1] = Data{Db: "bike", Dt: 0, Formatter: nil}
-			_, err := Simple(&c, db, "users", columns)
+			columns := make(map[int]ssp.Data)
+			columns[1] = ssp.Data{Db: "bike", Dt: 0, Formatter: nil}
+			_, err := ssp.Simple(&c, db, "users", columns)
 
 			Expect(fmt.Sprintf("%v", err)).To(Equal("Bad map id, column[0] dont exist"))
 		})
@@ -1219,15 +1230,15 @@ func Errors(db *gorm.DB) {
 
 			c := ControllerEmulated{Params: mapa}
 
-			columns := make(map[int]Data)
-			columns[0] = Data{Db: "name", Dt: 0, Formatter: func(
+			columns := make(map[int]ssp.Data)
+			columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: func(
 				data interface{}, row map[string]interface{}) (interface{}, error) {
 				layout := "2006-01-02T15:04:05.000Z"
 				//try convert name to date
 				return time.Parse(layout, data.(string))
 			}}
 
-			_, err := Simple(&c, db, "users", columns)
+			_, err := ssp.Simple(&c, db, "users", columns)
 
 			Expect(err).ToNot(BeNil())
 		})
