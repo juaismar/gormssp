@@ -321,8 +321,6 @@ func order(c Controller, columns map[int]Data) func(db *gorm.DB) *gorm.DB {
 					order := "desc"
 					if requestColumnData == "asc" {
 						order = "asc"
-					} else {
-						order = "desc"
 					}
 
 					order = checkOrderDialect(order)
@@ -460,6 +458,9 @@ func getFields(rows *sql.Rows) (map[string]interface{}, error) {
 	current := makeResultReceiver(length)
 
 	columnsType, err := rows.ColumnTypes()
+	if err != nil {
+		return nil, err
+	}
 
 	err = rows.Scan(current...)
 	if err != nil {
