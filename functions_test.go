@@ -883,13 +883,13 @@ func SimpleFunctionTest(db *gorm.DB) {
 				mapa["order[0][column]"] = "0"
 				mapa["order[0][dir]"] = "asc"
 
-				mapa["columns[name][data]"] = "0"
-				mapa["columns[name][searchable]"] = "true"
-				mapa["columns[name][search][value]"] = "Juan"
+				mapa["columns[0][data]"] = "0"
+				mapa["columns[0][searchable]"] = "true"
+				mapa["columns[0][search][value]"] = "Juan"
 
-				mapa["columns[instrument][data]"] = "0"
-				mapa["columns[instrument][searchable]"] = "true"
-				mapa["columns[instrument][search][value]"] = "Tambor"
+				mapa["columns[1][data]"] = "1"
+				mapa["columns[1][searchable]"] = "true"
+				mapa["columns[1][search][value]"] = "Tambor"
 
 				c := ControllerEmulated{Params: mapa}
 
@@ -907,7 +907,6 @@ func SimpleFunctionTest(db *gorm.DB) {
 				row := make(map[string]interface{})
 				row["0"] = "Juan"
 				row["1"] = "Tambor"
-				testData = append(testData, row)
 				testData = append(testData, row)
 
 				Expect(result.Data).To(Equal(testData))
