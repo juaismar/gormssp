@@ -2,11 +2,12 @@ package sqlite
 
 import (
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	_ "github.com/jinzhu/gorm/dialects/sqlite" // Needed for Gorm
 
-	globalDB "github.com/juaismar/gormssp/test/dbs"
+	databases "github.com/juaismar/gormssp/test/dbs"
 )
 
+// OpenDB return the Database connection
 func OpenDB() *gorm.DB {
 
 	db, err := gorm.Open("sqlite3", "test.db")
@@ -14,7 +15,7 @@ func OpenDB() *gorm.DB {
 		panic(err)
 	}
 
-	globalDB.InitDB(db)
+	databases.InitDB(db)
 
 	return db
 }

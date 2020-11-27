@@ -187,7 +187,7 @@ func ComplexFunctionTest(db *gorm.DB) {
 	})
 }
 
-// RegExpTest test for regular expresions
+// RegExpTest test for regular expression
 func RegExpTest(db *gorm.DB) {
 	Describe("RegExp", func() {
 		It("Global search regex", func() {
