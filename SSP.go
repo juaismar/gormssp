@@ -390,60 +390,70 @@ func search(column map[int]Data, keyColumnsI string) int {
 //check if searchable field is string
 func bindingTypes(value string, columnsType []*sql.ColumnType, column Data, isRegEx bool) string {
 	columndb := column.Db
-	for _, element := range columnsType {
-		if element.Name() == columndb {
+	for _, columnInfo := range columnsType {
+		if columnInfo.Name() == columndb {
 
-			searching := element.DatabaseTypeName()
+			searching := columnInfo.DatabaseTypeName()
 			if strings.Contains(searching, "varchar") {
 				searching = "varchar"
 			}
-			switch searching {
-			case "string", "TEXT", "varchar", "VARCHAR":
-				if isRegEx {
-					return regExp(columndb, value)
-				}
+			return bindingTypesQuery(searching, columndb, value, columnInfo, isRegEx, column)
 
-				if column.Cs {
-					return fmt.Sprintf("%s LIKE '%s'", columndb, "%"+value+"%")
-				}
-				return fmt.Sprintf("Lower(%s) LIKE '%s'", columndb, "%"+strings.ToLower(value)+"%")
-			case "UUID", "blob":
-				return fmt.Sprintf("%s = '%s'", columndb, value)
-			case "int32", "INT4", "integer", "INTEGER":
-				intval, err := strconv.Atoi(value)
-				if err != nil {
-					return ""
-				}
-				return fmt.Sprintf("%s = %d", columndb, intval)
-			case "bool", "BOOL":
-				boolval, err := strconv.ParseBool(value)
-				queryval := "NOT"
-				if err == nil && boolval {
-					queryval = ""
-				}
-				return fmt.Sprintf("%s IS %s TRUE", columndb, queryval)
-			case "real", "NUMERIC":
-				fmt.Print("GORMSSP WARNING: Serarching float values, float cannot be exactly equal\n")
-				float64val, err := strconv.ParseFloat(value, 64)
-				if err != nil {
-					return ""
-				}
-				return fmt.Sprintf("%s = %f", columndb, float64val)
-			default:
-				fmt.Printf("GORMSSP New type %v\n", element.DatabaseTypeName())
-				return ""
-			}
 		}
 	}
 
 	return ""
 }
+
+func bindingTypesQuery(searching, columndb, value string, columnInfo *sql.ColumnType, isRegEx bool, column Data) string {
+	switch searching {
+	case "string", "TEXT", "varchar", "VARCHAR":
+		if isRegEx {
+			return regExp(columndb, value)
+		}
+
+		if column.Cs {
+			return fmt.Sprintf("%s LIKE '%s'", columndb, "%"+value+"%")
+		}
+		return fmt.Sprintf("Lower(%s) LIKE '%s'", columndb, "%"+strings.ToLower(value)+"%")
+	case "UUID", "blob":
+		return fmt.Sprintf("%s = '%s'", columndb, value)
+	case "int32", "INT4", "integer", "INTEGER":
+		intval, err := strconv.Atoi(value)
+		if err != nil {
+			return ""
+		}
+		return fmt.Sprintf("%s = %d", columndb, intval)
+	case "bool", "BOOL":
+		boolval, err := strconv.ParseBool(value)
+		queryval := "NOT"
+		if err == nil && boolval {
+			queryval = ""
+		}
+		return fmt.Sprintf("%s IS %s TRUE", columndb, queryval)
+	case "real", "NUMERIC":
+		fmt.Print("GORMSSP WARNING: Serarching float values, float cannot be exactly equal\n")
+		float64val, err := strconv.ParseFloat(value, 64)
+		if err != nil {
+			return ""
+		}
+		return fmt.Sprintf("%s = %f", columndb, float64val)
+	default:
+		fmt.Printf("GORMSSP New type %v\n", columnInfo.DatabaseTypeName())
+		return ""
+	}
+}
+
 func regExp(columndb, value string) string {
-	if dialect == "sqlite3" {
+	switch dialect {
+	case "sqlite3":
 		//TODO make regexp
 		return fmt.Sprintf("Lower(%s) LIKE '%s'", columndb, "%"+strings.ToLower(value)+"%")
+	case "postgres":
+		return fmt.Sprintf("%s ~* '%s'", columndb, value)
+	default:
+		return fmt.Sprintf("%s ~* '%s'", columndb, value)
 	}
-	return fmt.Sprintf("%s ~* '%s'", columndb, value)
 }
 
 // https://github.com/jinzhu/gorm/issues/1167
@@ -480,52 +490,56 @@ func getFields(rows *sql.Rows) (map[string]interface{}, error) {
 		if strings.Contains(searching, "varchar") {
 			searching = "varchar"
 		}
-		switch searching {
-
-		case "string", "TEXT", "varchar", "VARCHAR":
-			value[key] = val.(string)
-		case "int32", "INT4", "integer", "INTEGER":
-			value[key] = val.(int64)
-		case "NUMERIC", "real":
-			switch vType.String() {
-			case "[]uint8":
-				value[key], err = strconv.ParseFloat(string(val.([]uint8)), 64)
-				if err != nil {
-					return nil, err
-				}
-			case "float64":
-				value[key] = val.(float64)
-			default:
-				value[key] = val
-			}
-		case "bool", "BOOL":
-			switch vType.String() {
-			case "int64":
-				value[key] = val.(int64) == 1
-			case "bool":
-				value[key] = val.(bool)
-			default:
-				value[key] = val
-			}
-
-		case "TIMESTAMPTZ", "datetime":
-			value[key] = val.(time.Time)
-		case "UUID", "blob":
-			switch vType.String() {
-			case "[]uint8":
-				value[key] = string(val.([]uint8))
-			case "uuid":
-				value[key] = val
-			default:
-				value[key] = val
-			}
-		default:
-			fmt.Printf("GORMSSP New type: %v for key: %v\n", searching, key)
-			value[key] = val
+		value[key], err = getFieldsSearch(searching, key, val, vType)
+		if err != nil {
+			return nil, err
 		}
 
 	}
 	return value, nil
+}
+
+func getFieldsSearch(searching, key string, val interface{}, vType reflect.Type) (interface{}, error) {
+	switch searching {
+
+	case "string", "TEXT", "varchar", "VARCHAR":
+		return val.(string), nil
+	case "int32", "INT4", "integer", "INTEGER":
+		return val.(int64), nil
+	case "NUMERIC", "real":
+		switch vType.String() {
+		case "[]uint8":
+			return strconv.ParseFloat(string(val.([]uint8)), 64)
+		case "float64":
+			return val.(float64), nil
+		default:
+			return val, nil
+		}
+	case "bool", "BOOL":
+		switch vType.String() {
+		case "int64":
+			return val.(int64) == 1, nil
+		case "bool":
+			return val.(bool), nil
+		default:
+			return val, nil
+		}
+
+	case "TIMESTAMPTZ", "datetime":
+		return val.(time.Time), nil
+	case "UUID", "blob":
+		switch vType.String() {
+		case "[]uint8":
+			return string(val.([]uint8)), nil
+		case "uuid":
+			return val, nil
+		default:
+			return val, nil
+		}
+	default:
+		fmt.Printf("GORMSSP New type: %v for key: %v\n", searching, key)
+		return val, nil
+	}
 }
 
 func makeResultReceiver(length int) []interface{} {

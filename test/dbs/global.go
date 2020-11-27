@@ -1,10 +1,11 @@
-package globalDB
+package databases
 
 import (
 	"github.com/jinzhu/gorm"
 	model "github.com/juaismar/gormssp/test/models"
 )
 
+// InitDB clear and populate database
 func InitDB(db *gorm.DB) {
 
 	db.AutoMigrate(&model.User{})

@@ -9,6 +9,7 @@ import (
 
 var layoutISO = "2006-01-02"
 
+// User is the model for test
 type User struct {
 	gorm.Model
 
@@ -23,6 +24,7 @@ type User struct {
 	Bitcoins   float64
 }
 
+// GetDefaultData returns data to populate table
 func GetDefaultData() []User {
 
 	date, _ := time.Parse(layoutISO, "2011-11-11")
