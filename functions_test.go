@@ -873,6 +873,46 @@ func SimpleFunctionTest(db *gorm.DB) {
 				Expect(result.Data).To(Equal(testData))
 			})
 		})
+		Describe("Multiple individual search", func() {
+			It("returns 1 Juan", func() {
+
+				mapa := make(map[string]string)
+				mapa["draw"] = "64"
+				mapa["start"] = "0"
+				mapa["length"] = "10"
+				mapa["order[0][column]"] = "0"
+				mapa["order[0][dir]"] = "asc"
+
+				mapa["columns[name][data]"] = "0"
+				mapa["columns[name][searchable]"] = "true"
+				mapa["columns[name][search][value]"] = "Juan"
+
+				mapa["columns[instrument][data]"] = "0"
+				mapa["columns[instrument][searchable]"] = "true"
+				mapa["columns[instrument][search][value]"] = "Tambor"
+
+				c := ControllerEmulated{Params: mapa}
+
+				columns := make(map[int]ssp.Data)
+				columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+				columns[1] = ssp.Data{Db: "instrument", Dt: 1, Formatter: nil}
+				result, err := ssp.Simple(&c, db, "users", columns)
+
+				Expect(err).To(BeNil())
+				Expect(result.Draw).To(Equal(64))
+				Expect(result.RecordsTotal).To(Equal(6))
+				Expect(result.RecordsFiltered).To(Equal(1))
+
+				testData := make([]interface{}, 0)
+				row := make(map[string]interface{})
+				row["0"] = "Juan"
+				row["1"] = "Tambor"
+				testData = append(testData, row)
+				testData = append(testData, row)
+
+				Expect(result.Data).To(Equal(testData))
+			})
+		})
 		Describe("Naming a row", func() {
 			It("returns all", func() {
 
