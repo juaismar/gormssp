@@ -260,6 +260,111 @@ func RegExpTest(db *gorm.DB) {
 
 			Expect(result.Data).To(Equal(testData))
 		})
+		It("returns names 2 names", func() {
+
+			mapa := make(map[string]string)
+			mapa["draw"] = "64"
+			mapa["start"] = "0"
+			mapa["length"] = "10"
+			mapa["order[0][column]"] = "0"
+			mapa["order[0][dir]"] = "asc"
+
+			mapa["columns[0][data]"] = "0"
+			mapa["columns[0][searchable]"] = "true"
+			mapa["columns[0][search][value]"] = "Marta|Laura"
+			mapa["columns[0][search][regex]"] = "true"
+
+			c := ControllerEmulated{Params: mapa}
+
+			columns := make(map[int]ssp.Data)
+			columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+			result, err := ssp.Simple(&c, db, "users", columns)
+
+			Expect(err).To(BeNil())
+			Expect(result.Draw).To(Equal(64))
+			Expect(result.RecordsTotal).To(Equal(6))
+			Expect(result.RecordsFiltered).To(Equal(2))
+
+			testData := make([]interface{}, 0)
+			row := make(map[string]interface{})
+			row["0"] = "Marta"
+			testData = append(testData, row)
+			row = make(map[string]interface{})
+			row["0"] = "Laura"
+			testData = append(testData, row)
+
+			Expect(result.Data).To(Equal(testData))
+		})
+		It("returns 2 ages int", func() {
+
+			mapa := make(map[string]string)
+			mapa["draw"] = "64"
+			mapa["start"] = "0"
+			mapa["length"] = "10"
+			mapa["order[0][column]"] = "0"
+			mapa["order[0][dir]"] = "asc"
+
+			mapa["columns[0][data]"] = "0"
+			mapa["columns[0][searchable]"] = "true"
+			mapa["columns[0][search][value]"] = "13|18"
+			mapa["columns[0][search][regex]"] = "true"
+
+			c := ControllerEmulated{Params: mapa}
+
+			columns := make(map[int]ssp.Data)
+			columns[0] = ssp.Data{Db: "age", Dt: 0, Formatter: nil}
+			result, err := ssp.Simple(&c, db, "users", columns)
+
+			Expect(err).To(BeNil())
+			Expect(result.Draw).To(Equal(64))
+			Expect(result.RecordsTotal).To(Equal(6))
+			Expect(result.RecordsFiltered).To(Equal(2))
+
+			testData := make([]interface{}, 0)
+			row := make(map[string]interface{})
+			row["0"] = int64(18)
+			testData = append(testData, row)
+			row = make(map[string]interface{})
+			row["0"] = int64(13)
+			testData = append(testData, row)
+
+			Expect(result.Data).To(Equal(testData))
+		})
+		It("returns 2 money float", func() {
+
+			mapa := make(map[string]string)
+			mapa["draw"] = "64"
+			mapa["start"] = "0"
+			mapa["length"] = "10"
+			mapa["order[0][column]"] = "0"
+			mapa["order[0][dir]"] = "asc"
+
+			mapa["columns[0][data]"] = "0"
+			mapa["columns[0][searchable]"] = "true"
+			mapa["columns[0][search][value]"] = "22.1100|0.1000"
+			mapa["columns[0][search][regex]"] = "true"
+
+			c := ControllerEmulated{Params: mapa}
+
+			columns := make(map[int]ssp.Data)
+			columns[0] = ssp.Data{Db: "money", Dt: 0, Formatter: nil}
+			result, err := ssp.Simple(&c, db, "users", columns)
+
+			Expect(err).To(BeNil())
+			Expect(result.Draw).To(Equal(64))
+			Expect(result.RecordsTotal).To(Equal(6))
+			//Expect(result.RecordsFiltered).To(Equal(2))
+
+			testData := make([]interface{}, 0)
+			row := make(map[string]interface{})
+			row["0"] = float64(22.110000610351562)
+			testData = append(testData, row)
+			row = make(map[string]interface{})
+			row["0"] = float64(0.10000000149011612)
+			testData = append(testData, row)
+
+			Expect(result.Data).To(Equal(testData))
+		})
 	})
 }
 
