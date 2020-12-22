@@ -417,8 +417,14 @@ func bindingTypesQuery(searching, columndb, value string, columnInfo *sql.Column
 		}
 		return fmt.Sprintf("Lower(%s) LIKE '%s'", columndb, "%"+strings.ToLower(value)+"%")
 	case "UUID", "blob":
+		if isRegEx {
+			return regExp(fmt.Sprintf("CAST(%s AS TEXT)", columndb), value)
+		}
 		return fmt.Sprintf("%s = '%s'", columndb, value)
 	case "int32", "INT4", "integer", "INTEGER":
+		if isRegEx {
+			return regExp(fmt.Sprintf("CAST(%s AS TEXT)", columndb), value)
+		}
 		intval, err := strconv.Atoi(value)
 		if err != nil {
 			return ""
@@ -432,6 +438,9 @@ func bindingTypesQuery(searching, columndb, value string, columnInfo *sql.Column
 		}
 		return fmt.Sprintf("%s IS %s TRUE", columndb, queryval)
 	case "real", "NUMERIC":
+		if isRegEx {
+			return regExp(fmt.Sprintf("CAST(%s AS TEXT)", columndb), value)
+		}
 		fmt.Print("GORMSSP WARNING: Serarching float values, float cannot be exactly equal\n")
 		float64val, err := strconv.ParseFloat(value, 64)
 		if err != nil {
@@ -531,7 +540,7 @@ func getFieldsSearch(searching, key string, val interface{}, vType reflect.Type)
 		switch vType.String() {
 		case "[]uint8":
 			return string(val.([]uint8)), nil
-		case "uuid":
+		case "string":
 			return val, nil
 		default:
 			return val, nil
