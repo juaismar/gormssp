@@ -53,7 +53,7 @@ func (c *User) Pagination() {
 
   // Send the data to the client
   // "users" is the name of the table
-  c.Data["json"] = SSP.Simple(c, model.ORM, "users", columns)
+  c.Data["json"], _ = SSP.Simple(c, model.ORM, "users", columns)
   c.ServeJSON()
 }
 ```
@@ -61,12 +61,12 @@ func (c *User) Pagination() {
 -This is a example of data formatting.
 ```
 columns[3] = SSP.Data{Db: "registered", Dt: 3, Formatter: func(
-  data interface{}, row map[string]interface{}) interface{} {
+  data interface{}, row map[string]interface{}) (interface{}, error) {
   //data is the value id column, row is a map whit the values of all columns
   if data != nil {
-    return data.(time.Time).Format("2006-01-02 15:04:05")
+    return data.(time.Time).Format("2006-01-02 15:04:05"), nil
   }
-  return ""
+  return "", nil
 }}
 ```
 
@@ -84,7 +84,7 @@ func (c *User) Pagination() {
     var whereAll []string
     whereAll = append(whereAll, "deleted_at IS NULL")
 
-    c.Data["json"] = SSP.Complex(c, model.ORM, "events", columns, whereResult, whereAll)
+    c.Data["json"], _ = SSP.Complex(c, model.ORM, "events", columns, whereResult, whereAll)
     c.ServeJSON()
 }
 ```
