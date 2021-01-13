@@ -14,13 +14,13 @@ _Using Datatables pagination with golang_
 
 Database compatible: Postgres (stable), SQLite (whitout REGEXP)
 
-* Oviously use it in a golang project
+* Obviously use it in a golang project
 * Gorm package (https://gorm.io/) (https://github.com/jinzhu/gorm)
 * Beego package (https://beego.me/) (https://github.com/astaxie/beego)
 
 ### Installation 🔧
 
-_Install whit the next command:_
+_Install with the next command:_
 
 ```
 go get github.com/juaismar/gormssp
@@ -35,7 +35,7 @@ import ("github.com/juaismar/gormssp")
 
 A working example on https://github.com/juaismar/GormSSP_Example
 
--This is a simple code that send data to the Datatables JS client.
+-This is a simple code that sends data to the Datatables JS client.
 ```
 import ("github.com/juaismar/gormssp")
 
