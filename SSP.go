@@ -47,7 +47,7 @@ func Simple(c Controller, conn *gorm.DB,
 	columnsType, err := initBinding(conn, table)
 
 	// Build the SQL query string from the request
-	rows, err := conn.Debug().Select("*").
+	rows, err := conn.Select("*").
 		Scopes(limit(c),
 			filterGlobal(c, columns, columnsType),
 			filterIndividual(c, columns, columnsType),
