@@ -453,6 +453,49 @@ func Types(db *gorm.DB) {
 				Expect(result.Data).To(Equal(testData))
 			})
 		})
+		Describe("int 8", func() {
+			It("returns 2 users", func() {
+
+				mapa := make(map[string]string)
+				mapa["draw"] = "64"
+				mapa["start"] = "0"
+				mapa["length"] = "10"
+				mapa["order[0][column]"] = "0"
+				mapa["order[0][dir]"] = "asc"
+
+				mapa["columns[0][data]"] = "0"
+				mapa["columns[0][searchable]"] = "true"
+				mapa["columns[0][search][value]"] = ""
+
+				mapa["columns[1][data]"] = "1"
+				mapa["columns[1][searchable]"] = "true"
+				mapa["columns[1][search][value]"] = "1"
+
+				c := ControllerEmulated{Params: mapa}
+
+				columns := make(map[int]ssp.Data)
+				columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+				columns[1] = ssp.Data{Db: "toys", Dt: 1, Formatter: nil}
+				result, err := ssp.Simple(&c, db, "users", columns)
+
+				Expect(err).To(BeNil())
+				Expect(result.Draw).To(Equal(64))
+				Expect(result.RecordsTotal).To(Equal(6))
+				Expect(result.RecordsFiltered).To(Equal(2))
+
+				testData := make([]interface{}, 0)
+				row := make(map[string]interface{})
+				row["0"] = "JuAn"
+				row["1"] = int64(1)
+				testData = append(testData, row)
+				row = make(map[string]interface{})
+				row["0"] = "Marta"
+				row["1"] = int64(1)
+				testData = append(testData, row)
+
+				Expect(result.Data).To(Equal(testData))
+			})
+		})
 		Describe("bool", func() {
 			It("returns fun only Juan Joaquin Laura", func() {
 
