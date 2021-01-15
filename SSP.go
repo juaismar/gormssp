@@ -239,7 +239,7 @@ func filterGlobal(c Controller, columns map[int]Data, columnsType []*sql.ColumnT
 					globalSearch += query
 				} else {
 					if columnIdx < 0 && requestColumn == "true" {
-						fmt.Printf("(002) Do you forgot searchable: false in column %v ?\n", keyColumnsData)
+						fmt.Printf("(002) Do you forgot searchable: false in column %v ? or wrong column name in client side\n (client field data: must be same than server side DT: field)\n", keyColumnsData)
 					}
 				}
 			}
@@ -284,7 +284,7 @@ func filterIndividual(c Controller, columns map[int]Data, columnsType []*sql.Col
 
 			} else {
 				if columnIdx < 0 && requestColumn == "true" {
-					fmt.Printf("(001) Do you forgot searchable: false in column %v ?\n", keyColumnsData)
+					fmt.Printf("(001) Do you forgot searchable: false in column %v ? or wrong column name in client side\n (client field data: must be same than server side DT: field)\n", keyColumnsData)
 				}
 			}
 		}
@@ -329,7 +329,7 @@ func order(c Controller, columns map[int]Data) func(db *gorm.DB) *gorm.DB {
 					db = db.Order(query)
 				} else {
 					if columnIdx < 0 && c.GetString(columnIdxTittle) == "true" {
-						fmt.Printf("Do you forgot orderable: false in column %v ?\n", columnIdxOrder)
+						fmt.Printf("(003) Do you forgot orderable: false in column %v ?\n", columnIdxOrder)
 					}
 				}
 			}
@@ -421,7 +421,7 @@ func bindingTypesQuery(searching, columndb, value string, columnInfo *sql.Column
 			return regExp(fmt.Sprintf("CAST(\"%s\" AS TEXT)", columndb), value)
 		}
 		return fmt.Sprintf("\"%s\" = '%s'", columndb, value)
-	case "int32", "INT4", "INT8", "integer", "INTEGER":
+	case "int32", "INT4", "INT8", "integer", "INTEGER", "bigint":
 		if isRegEx {
 			return regExp(fmt.Sprintf("CAST(\"%s\" AS TEXT)", columndb), value)
 		}
@@ -441,14 +441,14 @@ func bindingTypesQuery(searching, columndb, value string, columnInfo *sql.Column
 		if isRegEx {
 			return regExp(fmt.Sprintf("CAST(\"%s\" AS TEXT)", columndb), value)
 		}
-		fmt.Print("GORMSSP WARNING: Serarching float values, float cannot be exactly equal\n")
+		fmt.Print("(005) GORMSSP WARNING: Serarching float values, float cannot be exactly equal\n")
 		float64val, err := strconv.ParseFloat(value, 64)
 		if err != nil {
 			return ""
 		}
 		return fmt.Sprintf("\"%s\" = %f", columndb, float64val)
 	default:
-		fmt.Printf("GORMSSP New type %v\n", columnInfo.DatabaseTypeName())
+		fmt.Printf("(004) GORMSSP New type %v\n", columnInfo.DatabaseTypeName())
 		return ""
 	}
 }
@@ -513,7 +513,7 @@ func getFieldsSearch(searching, key string, val interface{}, vType reflect.Type)
 
 	case "string", "TEXT", "varchar", "VARCHAR":
 		return val.(string), nil
-	case "int32", "INT4", "INT8", "integer", "INTEGER":
+	case "int32", "INT4", "INT8", "integer", "bigint", "INTEGER":
 		return val.(int64), nil
 	case "NUMERIC", "real":
 		switch vType.String() {
@@ -546,7 +546,7 @@ func getFieldsSearch(searching, key string, val interface{}, vType reflect.Type)
 			return val, nil
 		}
 	default:
-		fmt.Printf("GORMSSP New type: %v for key: %v\n", searching, key)
+		fmt.Printf("(006) GORMSSP New type: %v for key: %v\n", searching, key)
 		return val, nil
 	}
 }
