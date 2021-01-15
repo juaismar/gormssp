@@ -47,7 +47,7 @@ func Simple(c Controller, conn *gorm.DB,
 	columnsType, err := initBinding(conn, table)
 
 	// Build the SQL query string from the request
-	rows, err := conn.Select("*").
+	rows, err := conn.Debug().Select("*").
 		Scopes(limit(c),
 			filterGlobal(c, columns, columnsType),
 			filterIndividual(c, columns, columnsType),
@@ -418,12 +418,12 @@ func bindingTypesQuery(searching, columndb, value string, columnInfo *sql.Column
 		return fmt.Sprintf("Lower(\"%s\") LIKE '%s'", columndb, "%"+strings.ToLower(value)+"%")
 	case "UUID", "blob":
 		if isRegEx {
-			return regExp(fmt.Sprintf("CAST(\"%s\" AS TEXT)", columndb), value)
+			return regExp(fmt.Sprintf("CAST(%s AS TEXT)", columndb), value)
 		}
 		return fmt.Sprintf("\"%s\" = '%s'", columndb, value)
 	case "int32", "INT4", "INT8", "integer", "INTEGER":
 		if isRegEx {
-			return regExp(fmt.Sprintf("CAST(\"%s\" AS TEXT)", columndb), value)
+			return regExp(fmt.Sprintf("CAST(%s AS TEXT)", columndb), value)
 		}
 		intval, err := strconv.Atoi(value)
 		if err != nil {
@@ -439,7 +439,7 @@ func bindingTypesQuery(searching, columndb, value string, columnInfo *sql.Column
 		return fmt.Sprintf("\"%s\" IS %s TRUE", columndb, queryval)
 	case "real", "NUMERIC":
 		if isRegEx {
-			return regExp(fmt.Sprintf("CAST(\"%s\" AS TEXT)", columndb), value)
+			return regExp(fmt.Sprintf("CAST(%s AS TEXT)", columndb), value)
 		}
 		fmt.Print("GORMSSP WARNING: Serarching float values, float cannot be exactly equal\n")
 		float64val, err := strconv.ParseFloat(value, 64)
