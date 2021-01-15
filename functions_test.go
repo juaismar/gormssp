@@ -481,7 +481,7 @@ func Types(db *gorm.DB) {
 				Expect(err).To(BeNil())
 				Expect(result.Draw).To(Equal(64))
 				Expect(result.RecordsTotal).To(Equal(6))
-				//Expect(result.RecordsFiltered).To(Equal(2))
+				Expect(result.RecordsFiltered).To(Equal(2))
 
 				testData := make([]interface{}, 0)
 				row := make(map[string]interface{})
