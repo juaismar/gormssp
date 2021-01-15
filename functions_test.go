@@ -353,7 +353,7 @@ func RegExpTest(db *gorm.DB) {
 			Expect(err).To(BeNil())
 			Expect(result.Draw).To(Equal(64))
 			Expect(result.RecordsTotal).To(Equal(6))
-			//Expect(result.RecordsFiltered).To(Equal(2))
+			Expect(result.RecordsFiltered).To(Equal(2))
 
 			testData := make([]interface{}, 0)
 			row := make(map[string]interface{})
@@ -1428,6 +1428,45 @@ func Errors(db *gorm.DB) {
 			_, err := ssp.Simple(&c, db, "users", columns)
 
 			Expect(err).ToNot(BeNil())
+		})
+	})
+	Describe("Column with reserved word", func() {
+		It("returns 2 Age 15", func() {
+
+			mapa := make(map[string]string)
+			mapa["draw"] = "64"
+			mapa["start"] = "0"
+			mapa["length"] = "10"
+			mapa["order[0][column]"] = "0"
+			mapa["order[0][dir]"] = "asc"
+
+			mapa["columns[0][data]"] = "0"
+			mapa["columns[0][searchable]"] = "true"
+			mapa["columns[0][search][value]"] = ""
+
+			mapa["columns[1][data]"] = "1"
+			mapa["columns[1][searchable]"] = "true"
+			mapa["columns[1][search][value]"] = "2"
+
+			c := ControllerEmulated{Params: mapa}
+
+			columns := make(map[int]ssp.Data)
+			columns[0] = ssp.Data{Db: "name", Dt: 0, Formatter: nil}
+			columns[1] = ssp.Data{Db: "end", Dt: 1, Formatter: nil}
+			result, err := ssp.Simple(&c, db, "users", columns)
+
+			Expect(err).To(BeNil())
+			Expect(result.Draw).To(Equal(64))
+			Expect(result.RecordsTotal).To(Equal(6))
+			Expect(result.RecordsFiltered).To(Equal(1))
+
+			testData := make([]interface{}, 0)
+			row := make(map[string]interface{})
+			row["0"] = "Joaquin"
+			row["1"] = int64(2)
+			testData = append(testData, row)
+
+			Expect(result.Data).To(Equal(testData))
 		})
 	})
 }
