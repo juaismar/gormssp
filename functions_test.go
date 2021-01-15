@@ -330,7 +330,7 @@ func RegExpTest(db *gorm.DB) {
 
 			Expect(result.Data).To(Equal(testData))
 		})
-		FIt("returns 2 money float", func() {
+		It("returns 2 money float", func() {
 
 			mapa := make(map[string]string)
 			mapa["draw"] = "64"
