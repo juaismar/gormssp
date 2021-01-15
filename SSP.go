@@ -413,40 +413,40 @@ func bindingTypesQuery(searching, columndb, value string, columnInfo *sql.Column
 		}
 
 		if column.Cs {
-			return fmt.Sprintf("%s LIKE '%s'", columndb, "%"+value+"%")
+			return fmt.Sprintf("\"%s\" LIKE '%s'", columndb, "%"+value+"%")
 		}
-		return fmt.Sprintf("Lower(%s) LIKE '%s'", columndb, "%"+strings.ToLower(value)+"%")
+		return fmt.Sprintf("Lower(\"%s\") LIKE '%s'", columndb, "%"+strings.ToLower(value)+"%")
 	case "UUID", "blob":
 		if isRegEx {
-			return regExp(fmt.Sprintf("CAST(%s AS TEXT)", columndb), value)
+			return regExp(fmt.Sprintf("CAST(\"%s\" AS TEXT)", columndb), value)
 		}
-		return fmt.Sprintf("%s = '%s'", columndb, value)
+		return fmt.Sprintf("\"%s\" = '%s'", columndb, value)
 	case "int32", "INT4", "INT8", "integer", "INTEGER":
 		if isRegEx {
-			return regExp(fmt.Sprintf("CAST(%s AS TEXT)", columndb), value)
+			return regExp(fmt.Sprintf("CAST(\"%s\" AS TEXT)", columndb), value)
 		}
 		intval, err := strconv.Atoi(value)
 		if err != nil {
 			return ""
 		}
-		return fmt.Sprintf("%s = %d", columndb, intval)
+		return fmt.Sprintf("\"%s\" = %d", columndb, intval)
 	case "bool", "BOOL":
 		boolval, err := strconv.ParseBool(value)
 		queryval := "NOT"
 		if err == nil && boolval {
 			queryval = ""
 		}
-		return fmt.Sprintf("%s IS %s TRUE", columndb, queryval)
+		return fmt.Sprintf("\"%s\" IS %s TRUE", columndb, queryval)
 	case "real", "NUMERIC":
 		if isRegEx {
-			return regExp(fmt.Sprintf("CAST(%s AS TEXT)", columndb), value)
+			return regExp(fmt.Sprintf("CAST(\"%s\" AS TEXT)", columndb), value)
 		}
 		fmt.Print("GORMSSP WARNING: Serarching float values, float cannot be exactly equal\n")
 		float64val, err := strconv.ParseFloat(value, 64)
 		if err != nil {
 			return ""
 		}
-		return fmt.Sprintf("%s = %f", columndb, float64val)
+		return fmt.Sprintf("\"%s\" = %f", columndb, float64val)
 	default:
 		fmt.Printf("GORMSSP New type %v\n", columnInfo.DatabaseTypeName())
 		return ""
@@ -457,11 +457,11 @@ func regExp(columndb, value string) string {
 	switch dialect {
 	case "sqlite3":
 		//TODO make regexp
-		return fmt.Sprintf("Lower(%s) LIKE '%s'", columndb, "%"+strings.ToLower(value)+"%")
+		return fmt.Sprintf("Lower(\"%s\") LIKE '%s'", columndb, "%"+strings.ToLower(value)+"%")
 	case "postgres":
-		return fmt.Sprintf("%s ~* '%s'", columndb, value)
+		return fmt.Sprintf("\"%s\" ~* '%s'", columndb, value)
 	default:
-		return fmt.Sprintf("%s ~* '%s'", columndb, value)
+		return fmt.Sprintf("\"%s\" ~* '%s'", columndb, value)
 	}
 }
 
