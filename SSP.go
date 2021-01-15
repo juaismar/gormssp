@@ -239,7 +239,7 @@ func filterGlobal(c Controller, columns map[int]Data, columnsType []*sql.ColumnT
 					globalSearch += query
 				} else {
 					if columnIdx < 0 && requestColumn == "true" {
-						fmt.Printf("(002) Do you forgot searchable: false in column %v ?\n", keyColumnsData)
+						fmt.Printf("(002) Do you forgot searchable: false in column %v ? or wrong column name in client side\n (client field data: must be same than server side DT: field)\n", keyColumnsData)
 					}
 				}
 			}
@@ -284,7 +284,7 @@ func filterIndividual(c Controller, columns map[int]Data, columnsType []*sql.Col
 
 			} else {
 				if columnIdx < 0 && requestColumn == "true" {
-					fmt.Printf("(001) Do you forgot searchable: false in column %v ?\n", keyColumnsData)
+					fmt.Printf("(001) Do you forgot searchable: false in column %v ? or wrong column name in client side\n (client field data: must be same than server side DT: field)\n", keyColumnsData)
 				}
 			}
 		}
