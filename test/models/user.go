@@ -22,6 +22,7 @@ type User struct {
 	Fun        bool
 	Money      float32
 	Bitcoins   float64
+	Toys       int64
 }
 
 // GetDefaultData returns data to populate table
@@ -47,6 +48,7 @@ func GetDefaultData() []User {
 			Fun:        true,
 			Money:      2.0,
 			Bitcoins:   3.0,
+			Toys:       0,
 		},
 		{
 			UUID:       uuidJuAn,
@@ -58,6 +60,7 @@ func GetDefaultData() []User {
 			Fun:        false,
 			Money:      3.1,
 			Bitcoins:   4.3,
+			Toys:       1,
 		},
 		{
 			UUID:       uuidJoaquin,
@@ -69,6 +72,7 @@ func GetDefaultData() []User {
 			Fun:        true,
 			Money:      3.4,
 			Bitcoins:   7.18,
+			Toys:       2,
 		},
 		{
 			UUID:       uuidEzequiel,
@@ -80,6 +84,7 @@ func GetDefaultData() []User {
 			Fun:        false,
 			Money:      22.11,
 			Bitcoins:   82.14,
+			Toys:       2,
 		},
 		{
 			UUID:       uuidMarta,
@@ -91,6 +96,7 @@ func GetDefaultData() []User {
 			Fun:        false,
 			Money:      2.0,
 			Bitcoins:   3.0,
+			Toys:       1,
 		},
 		{
 			UUID:       uuidLaura,
@@ -102,6 +108,7 @@ func GetDefaultData() []User {
 			Fun:        true,
 			Money:      0.1,
 			Bitcoins:   22.71,
+			Toys:       3,
 		},
 	}
 }

@@ -421,7 +421,7 @@ func bindingTypesQuery(searching, columndb, value string, columnInfo *sql.Column
 			return regExp(fmt.Sprintf("CAST(%s AS TEXT)", columndb), value)
 		}
 		return fmt.Sprintf("%s = '%s'", columndb, value)
-	case "int32", "INT4", "integer", "INTEGER":
+	case "int32", "INT4", "INT8", "integer", "INTEGER":
 		if isRegEx {
 			return regExp(fmt.Sprintf("CAST(%s AS TEXT)", columndb), value)
 		}
@@ -513,7 +513,7 @@ func getFieldsSearch(searching, key string, val interface{}, vType reflect.Type)
 
 	case "string", "TEXT", "varchar", "VARCHAR":
 		return val.(string), nil
-	case "int32", "INT4", "integer", "INTEGER":
+	case "int32", "INT4", "INT8", "integer", "INTEGER":
 		return val.(int64), nil
 	case "NUMERIC", "real":
 		switch vType.String() {
