@@ -33,6 +33,8 @@ github.com/jinzhu/inflection v1.0.0/go.mod h1:h+uFLlag+Qp1Va5pdKtLDYj+kHp5pxUVkr
 github.com/jinzhu/now v1.0.1/go.mod h1:d3SSVoowX0Lcu0IBviAWJpolVfI5UJVZZ7cO71lE/z8=
 github.com/juaismar/gormssp v0.2.2 h1:flv8yvy/Xp3wukckJ+zcCILB+0NOe/upUtQ9LEr6Bu4=
 github.com/juaismar/gormssp v0.2.2/go.mod h1:gmCurI8FHu6Nl9VqzfXechTWigOLUKm5r/4LIx/98eo=
+github.com/juaismar/gormssp v1.2.1 h1:oOicwOdjCFh1x+CeZIuOy6ryqlcZNDf2U6dIHGxKFmI=
+github.com/juaismar/gormssp v1.2.1/go.mod h1:HZfexYgsyMpzpTJuRajNGqA/EGQfEdG1zkqqM0mhym0=
 github.com/lib/pq v1.1.1/go.mod h1:5WUZQaWbwv1U+lTReE5YruASi9Al49XbQIvNi/34Woo=
 github.com/lib/pq v1.8.0 h1:9xohqzkUwzR4Ga4ivdTcawVS89YSDVxXMa3xJX3cGzg=
 github.com/lib/pq v1.8.0/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/jinzhu/gorm"
-	ssp "github.com/juaismar/gormssp"
+	ssp "github.com/juaismar/gormssp/v2"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
