@@ -4,7 +4,7 @@ import (
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite" // Needed for Gorm
 
-	databases "github.com/juaismar/gormssp/test/dbs"
+	databases "github.com/juaismar/gormssp/v2/test/dbs"
 )
 
 // OpenDB return the Database connection

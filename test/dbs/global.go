@@ -2,7 +2,7 @@ package databases
 
 import (
 	"github.com/jinzhu/gorm"
-	model "github.com/juaismar/gormssp/test/models"
+	model "github.com/juaismar/gormssp/v2/test/models"
 )
 
 // InitDB clear and populate database
