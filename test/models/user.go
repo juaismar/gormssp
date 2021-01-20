@@ -27,7 +27,7 @@ type User struct {
 }
 
 // GetDefaultData returns data to populate table
-func GetDefaultData() []User {
+func GetDefaultUser() []User {
 
 	date, _ := time.Parse(layoutISO, "2011-11-11")
 

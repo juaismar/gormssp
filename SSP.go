@@ -85,7 +85,8 @@ func Simple(c Controller, conn *gorm.DB,
 // Complex is a main method, externally called
 func Complex(c Controller, conn *gorm.DB, table string, columns map[int]Data,
 	whereResult []string,
-	whereAll []string) (responseJSON MessageDataTable, err error) {
+	whereAll []string,
+	whereJoin map[string]string) (responseJSON MessageDataTable, err error) {
 
 	dialect = conn.Dialect().GetName()
 
@@ -101,8 +102,14 @@ func Complex(c Controller, conn *gorm.DB, table string, columns map[int]Data,
 	whereResultFlated := flated(whereResult)
 	whereAllFlated := flated(whereAll)
 
-	rows, err := conn.Select("*").
-		Scopes(limit(c),
+	selectQuery, err := buildSelect(table, whereJoin, conn)
+	if err != nil {
+		return
+	}
+	rows, err := conn.Select(selectQuery).
+		Scopes(
+			setJoins(whereJoin),
+			limit(c),
 			filterGlobal(c, columns, columnsType),
 			filterIndividual(c, columns, columnsType),
 			order(c, columns)).
@@ -120,8 +127,11 @@ func Complex(c Controller, conn *gorm.DB, table string, columns map[int]Data,
 	}
 
 	//search in DDBB recordsFiltered
-	err = conn.Scopes(filterGlobal(c, columns, columnsType),
-		filterIndividual(c, columns, columnsType)).
+	err = conn.
+		Scopes(
+			setJoins(whereJoin),
+			filterGlobal(c, columns, columnsType),
+			filterIndividual(c, columns, columnsType)).
 		Where(whereResultFlated).
 		Where(whereAllFlated).
 		Table(table).
@@ -131,7 +141,9 @@ func Complex(c Controller, conn *gorm.DB, table string, columns map[int]Data,
 	}
 
 	//search in DDBB recordsTotal
-	err = conn.Table(table).Where(whereAllFlated).Count(&responseJSON.RecordsTotal).Error
+	err = conn.Table(table).
+		Scopes(setJoins(whereJoin)).
+		Where(whereAllFlated).Count(&responseJSON.RecordsTotal).Error
 	if err != nil {
 		return
 	}
@@ -201,6 +213,38 @@ func flated(whereArray []string) string {
 		query += where
 	}
 	return query
+}
+
+func buildSelect(table string, join map[string]string, conn *gorm.DB) (query string, err error) {
+	query = fmt.Sprintf("%s.*", table)
+	if len(join) == 0 {
+		return
+	}
+
+	subQuery, err := addFieldsSelect(table, conn)
+	query += subQuery
+	for tableName := range join {
+		subQuery, err = addFieldsSelect(tableName, conn)
+		query += subQuery
+	}
+	return
+}
+
+func addFieldsSelect(table string, conn *gorm.DB) (query string, err error) {
+	columnsType, err := initBinding(conn, table)
+	for _, columnInfo := range columnsType {
+		query += fmt.Sprintf(", %s.%s AS \"%s.%s\"", table, columnInfo.Name(), table, columnInfo.Name())
+	}
+	return
+}
+
+func setJoins(joins map[string]string) func(db *gorm.DB) *gorm.DB {
+	return func(db *gorm.DB) *gorm.DB {
+		for _, join := range joins {
+			db = db.Joins(join)
+		}
+		return db
+	}
 }
 
 //database func
