@@ -3,7 +3,7 @@ package postgres
 import (
 	"github.com/jinzhu/gorm"
 
-	databases "github.com/juaismar/gormssp/test/dbs"
+	databases "github.com/juaismar/gormssp/v2/test/dbs"
 )
 
 // OpenDB return the Database connection

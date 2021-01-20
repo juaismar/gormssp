@@ -7,7 +7,6 @@ require (
 	github.com/fzipp/gocyclo v0.3.1 // indirect
 	github.com/gordonklaus/ineffassign v0.0.0-20201107091007-3b93a8888063 // indirect
 	github.com/jinzhu/gorm v1.9.16
-	github.com/juaismar/gormssp v1.2.1
 	github.com/lib/pq v1.8.0
 	github.com/mattn/go-sqlite3 v2.0.1+incompatible // indirect
 	github.com/nxadm/tail v1.4.5 // indirect

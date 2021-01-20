@@ -1,8 +1,8 @@
 package ssp_test
 
 import (
-	"github.com/juaismar/gormssp/test/dbs/postgres"
-	"github.com/juaismar/gormssp/test/dbs/sqlite"
+	"github.com/juaismar/gormssp/v2/test/dbs/postgres"
+	"github.com/juaismar/gormssp/v2/test/dbs/sqlite"
 
 	_ "github.com/lib/pq"
 	. "github.com/onsi/ginkgo"

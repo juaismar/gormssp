@@ -12,7 +12,7 @@ _Using Datatables pagination with golang_
 
 ### Pre-requisites 📋
 
-Database compatible: Postgres (stable), SQLite (whitout REGEXP)
+Database compatible: Postgres (stable), SQLite (without REGEXP)
 
 * Obviously use it in a golang project
 * Gorm package (https://gorm.io/) (https://github.com/jinzhu/gorm)
@@ -23,13 +23,13 @@ Database compatible: Postgres (stable), SQLite (whitout REGEXP)
 _Install with the next command:_
 
 ```
-go get github.com/juaismar/gormssp
+go get github.com/juaismar/gormssp/v2
 ```
 
 _and import the package with:_
 
 ```
-import ("github.com/juaismar/gormssp")
+import ("github.com/juaismar/gormssp/v2")
 ```
 ## Working example 🚀
 
@@ -37,7 +37,7 @@ A working example on https://github.com/juaismar/GormSSP_Example
 
 -This is a simple code that sends data to the Datatables JS client.
 ```
-import ("github.com/juaismar/gormssp")
+import ("github.com/juaismar/gormssp/v2")
 
 func (c *User) Pagination() {
 
@@ -58,7 +58,7 @@ func (c *User) Pagination() {
 }
 ```
 
--This is a example of data formatting.
+-This is an example of data formatting.
 ```
 columns[3] = SSP.Data{Db: "registered", Dt: 3, Formatter: func(
   data interface{}, row map[string]interface{}) (interface{}, error) {
@@ -72,7 +72,7 @@ columns[3] = SSP.Data{Db: "registered", Dt: 3, Formatter: func(
 
 -This is a complex example.
 ```
-import ("github.com/juaismar/gormssp")
+import ("github.com/juaismar/gormssp/v2")
 
 func (c *User) Pagination() {
     columns := make(map[int]SSP.Data)
@@ -82,9 +82,10 @@ func (c *User) Pagination() {
     //whereAll is a WHERE condition to apply to all queries
     var whereResult []string
     var whereAll []string
+    var whereJoin = make(map[string]string, 0)
     whereAll = append(whereAll, "deleted_at IS NULL")
 
-    c.Data["json"], _ = SSP.Complex(c, model.ORM, "events", columns, whereResult, whereAll)
+    c.Data["json"], _ = SSP.Complex(c, model.ORM, "events", columns, whereResult, whereAll, whereJoin)
     c.ServeJSON()
 }
 ```
