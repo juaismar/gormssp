@@ -187,6 +187,7 @@ func ComplexFunctionTest(db *gorm.DB) {
 			Expect(result.Data).To(Equal(testData))
 		})
 		//check join compatibility
+
 		It("Join test", func() {
 
 			mapa := make(map[string]string)
@@ -231,6 +232,48 @@ func ComplexFunctionTest(db *gorm.DB) {
 			row["0"] = "Joaquin"
 			row["1"] = "Epona"
 			row["2"] = "Joaquin"
+			testData = append(testData, row)
+
+			Expect(result.Data).To(Equal(testData))
+		})
+		It("Join search test", func() {
+
+			mapa := make(map[string]string)
+			mapa["draw"] = "62"
+			mapa["start"] = "0"
+			mapa["length"] = "3"
+			mapa["order[0][column]"] = "0"
+			mapa["order[0][dir]"] = "asc"
+
+			mapa["columns[0][data]"] = "1"
+			mapa["columns[0][searchable]"] = "true"
+			mapa["columns[0][search][value]"] = "Cerverus"
+
+			c := ControllerEmulated{Params: mapa}
+
+			columns := make(map[int]ssp.Data)
+			columns[0] = ssp.Data{Db: "users.name", Dt: 0, Formatter: nil}
+			columns[1] = ssp.Data{Db: "pets.name", Dt: 1, Formatter: nil}
+			columns[2] = ssp.Data{Db: "name", Dt: 2, Formatter: nil}
+			whereResult := make([]string, 0)
+
+			whereJoin := make(map[string]string, 0)
+			whereJoin["pets"] = "left join pets on pets.master_id = users.uuid"
+
+			whereAll := make([]string, 0)
+
+			result, err := ssp.Complex(&c, db, "users", columns, whereResult, whereAll, whereJoin)
+
+			Expect(err).To(BeNil())
+			Expect(result.Draw).To(Equal(62))
+			Expect(result.RecordsTotal).To(Equal(6))
+			Expect(result.RecordsFiltered).To(Equal(1))
+
+			testData := make([]interface{}, 0)
+			row := make(map[string]interface{})
+			row["0"] = "Juan"
+			row["1"] = "Cerverus"
+			row["2"] = "Juan"
 			testData = append(testData, row)
 
 			Expect(result.Data).To(Equal(testData))

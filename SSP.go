@@ -44,7 +44,7 @@ func Simple(c Controller, conn *gorm.DB,
 	responseJSON.Draw = drawNumber(c)
 	dbConfig(conn)
 
-	columnsType, err := initBinding(conn, table)
+	columnsType, err := initBinding(conn, "*", table, make(map[string]string, 0))
 
 	// Build the SQL query string from the request
 	rows, err := conn.Select("*").
@@ -93,11 +93,6 @@ func Complex(c Controller, conn *gorm.DB, table string, columns map[int]Data,
 	responseJSON.Draw = drawNumber(c)
 	dbConfig(conn)
 
-	columnsType, err := initBinding(conn, table)
-	if err != nil {
-		return
-	}
-
 	// Build the SQL query string from the request
 	whereResultFlated := flated(whereResult)
 	whereAllFlated := flated(whereAll)
@@ -106,6 +101,12 @@ func Complex(c Controller, conn *gorm.DB, table string, columns map[int]Data,
 	if err != nil {
 		return
 	}
+
+	columnsType, err := initBinding(conn, selectQuery, table, whereJoin)
+	if err != nil {
+		return
+	}
+
 	rows, err := conn.Select(selectQuery).
 		Scopes(
 			setJoins(whereJoin),
@@ -231,7 +232,7 @@ func buildSelect(table string, join map[string]string, conn *gorm.DB) (query str
 }
 
 func addFieldsSelect(table string, conn *gorm.DB) (query string, err error) {
-	columnsType, err := initBinding(conn, table)
+	columnsType, err := initBinding(conn, "*", table, make(map[string]string, 0))
 	for _, columnInfo := range columnsType {
 		query += fmt.Sprintf(", %s.%s AS \"%s.%s\"", table, columnInfo.Name(), table, columnInfo.Name())
 	}
@@ -441,7 +442,7 @@ func bindingTypes(value string, columnsType []*sql.ColumnType, column Data, isRe
 			if strings.Contains(searching, "varchar") {
 				searching = "varchar"
 			}
-			return bindingTypesQuery(searching, columndb, value, columnInfo, isRegEx, column)
+			return bindingTypesQuery(searching, CheckReserved(columndb), value, columnInfo, isRegEx, column)
 
 		}
 	}
@@ -457,40 +458,40 @@ func bindingTypesQuery(searching, columndb, value string, columnInfo *sql.Column
 		}
 
 		if column.Cs {
-			return fmt.Sprintf("\"%s\" LIKE '%s'", columndb, "%"+value+"%")
+			return fmt.Sprintf("%s LIKE '%s'", columndb, "%"+value+"%")
 		}
-		return fmt.Sprintf("Lower(\"%s\") LIKE '%s'", columndb, "%"+strings.ToLower(value)+"%")
+		return fmt.Sprintf("Lower(%s) LIKE '%s'", columndb, "%"+strings.ToLower(value)+"%")
 	case "UUID", "blob":
 		if isRegEx {
-			return regExp(fmt.Sprintf("CAST(\"%s\" AS TEXT)", columndb), value)
+			return regExp(fmt.Sprintf("CAST(%s AS TEXT)", columndb), value)
 		}
-		return fmt.Sprintf("\"%s\" = '%s'", columndb, value)
+		return fmt.Sprintf("%s = '%s'", columndb, value)
 	case "int32", "INT4", "INT8", "integer", "INTEGER", "bigint":
 		if isRegEx {
-			return regExp(fmt.Sprintf("CAST(\"%s\" AS TEXT)", columndb), value)
+			return regExp(fmt.Sprintf("CAST(%s AS TEXT)", columndb), value)
 		}
 		intval, err := strconv.Atoi(value)
 		if err != nil {
 			return ""
 		}
-		return fmt.Sprintf("\"%s\" = %d", columndb, intval)
+		return fmt.Sprintf("%s = %d", columndb, intval)
 	case "bool", "BOOL":
 		boolval, err := strconv.ParseBool(value)
 		queryval := "NOT"
 		if err == nil && boolval {
 			queryval = ""
 		}
-		return fmt.Sprintf("\"%s\" IS %s TRUE", columndb, queryval)
+		return fmt.Sprintf("%s IS %s TRUE", columndb, queryval)
 	case "real", "NUMERIC":
 		if isRegEx {
-			return regExp(fmt.Sprintf("CAST(\"%s\" AS TEXT)", columndb), value)
+			return regExp(fmt.Sprintf("CAST(%s AS TEXT)", columndb), value)
 		}
 		fmt.Print("(005) GORMSSP WARNING: Serarching float values, float cannot be exactly equal\n")
 		float64val, err := strconv.ParseFloat(value, 64)
 		if err != nil {
 			return ""
 		}
-		return fmt.Sprintf("\"%s\" = %f", columndb, float64val)
+		return fmt.Sprintf("%s = %f", columndb, float64val)
 	default:
 		fmt.Printf("(004) GORMSSP New type %v\n", columnInfo.DatabaseTypeName())
 		return ""
@@ -605,9 +606,12 @@ func makeResultReceiver(length int) []interface{} {
 	return result
 }
 
-func initBinding(db *gorm.DB, table string) ([]*sql.ColumnType, error) {
-	rows, err := db.Select("*").
+func initBinding(db *gorm.DB, selectQuery, table string, whereJoin map[string]string) ([]*sql.ColumnType, error) {
+	rows, err := db.Select(selectQuery).
 		Table(table).
+		Scopes(
+			setJoins(whereJoin),
+		).
 		Limit(0).
 		Rows()
 	if err != nil {
