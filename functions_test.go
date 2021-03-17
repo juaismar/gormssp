@@ -1527,7 +1527,7 @@ func Errors(db *gorm.DB) {
 			}
 			_, err := ssp.Simple(&c, db, "users", columns)
 
-			Expect(fmt.Sprintf("%v", err)).To(Equal("Dt od Db cannot be nil in column[0]"))
+			Expect(fmt.Sprintf("%v", err)).To(Equal("Dt cannot be nil in column[0]"))
 		})
 	})
 	Describe("Format error", func() {

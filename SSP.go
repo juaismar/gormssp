@@ -168,7 +168,7 @@ func dataOutput(columns []Data, rows *sql.Rows) ([]interface{}, error) {
 			column := columns[j]
 			var dt string
 			if column.Dt == nil{
-				return nil, fmt.Errorf("Dt od Db cannot be nil in column[%v]", j)
+				return nil, fmt.Errorf("Dt cannot be nil in column[%v]", j)
 			}
 
 			vType := reflect.TypeOf(column.Dt)
