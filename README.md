@@ -46,10 +46,11 @@ func (c *User) Pagination() {
   // parameter represents the DataTables column identifier. In this case simple
   // indexes but can be a string
   // Formatter is a function to customize the value of field , can be nil.
-  columns := make(map[int]SSP.Data)
-  columns[0] = SSP.Data{Db: "name", Dt: 0, Formatter: nil}
-  columns[1] = SSP.Data{Db: "role", Dt: 1, Formatter: nil}
-  columns[2] = SSP.Data{Db: "email", Dt: 2, Formatter: nil}
+  columns := []SSP.Data{
+    SSP.Data{Db: "name", Dt: 0, Formatter: nil},
+    SSP.Data{Db: "role", Dt: 1, Formatter: nil},
+    SSP.Data{Db: "email", Dt: 2, Formatter: nil},
+  }
 
   // Send the data to the client
   // "users" is the name of the table
@@ -60,7 +61,7 @@ func (c *User) Pagination() {
 
 -This is an example of data formatting.
 ```
-columns[3] = SSP.Data{Db: "registered", Dt: 3, Formatter: func(
+SSP.Data{Db: "registered", Dt: 3, Formatter: func(
   data interface{}, row map[string]interface{}) (interface{}, error) {
   //data is the value id column, row is a map whit the values of all columns
   if data != nil {
@@ -75,9 +76,9 @@ columns[3] = SSP.Data{Db: "registered", Dt: 3, Formatter: func(
 import ("github.com/juaismar/gormssp/v2")
 
 func (c *User) Pagination() {
-    columns := make(map[int]SSP.Data)
-    columns[0] = SSP.Data{Db: "id", Dt: "id", Formatter: nil}
-	
+    columns := []SSP.Data{
+      SSP.Data{Db: "id", Dt: "id", Formatter: nil},
+    }
     //whereResult is a WHERE condition to apply to the result set
     //whereAll is a WHERE condition to apply to all queries
     var whereResult []string

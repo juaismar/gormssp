@@ -37,7 +37,7 @@ type Controller interface {
 // Simple is a main method, externally called
 func Simple(c Controller, conn *gorm.DB,
 	table string,
-	columns map[int]Data) (responseJSON MessageDataTable, err error) {
+	columns []Data) (responseJSON MessageDataTable, err error) {
 
 	dialect = conn.Dialect().GetName()
 
@@ -83,7 +83,7 @@ func Simple(c Controller, conn *gorm.DB,
 }
 
 // Complex is a main method, externally called
-func Complex(c Controller, conn *gorm.DB, table string, columns map[int]Data,
+func Complex(c Controller, conn *gorm.DB, table string, columns []Data,
 	whereResult []string,
 	whereAll []string,
 	whereJoin map[string]string) (responseJSON MessageDataTable, err error) {
@@ -153,7 +153,7 @@ func Complex(c Controller, conn *gorm.DB, table string, columns map[int]Data,
 	return
 }
 
-func dataOutput(columns map[int]Data, rows *sql.Rows) ([]interface{}, error) {
+func dataOutput(columns []Data, rows *sql.Rows) ([]interface{}, error) {
 	out := make([]interface{}, 0)
 
 	for rows.Next() {
@@ -167,8 +167,8 @@ func dataOutput(columns map[int]Data, rows *sql.Rows) ([]interface{}, error) {
 		for j := 0; j < len(columns); j++ {
 			column := columns[j]
 			var dt string
-			if column.Dt == nil {
-				return nil, fmt.Errorf("Bad map id, column[%v] dont exist", j)
+			if column.Dt == nil{
+				return nil, fmt.Errorf("Dt od Db cannot be nil in column[%v]", j)
 			}
 
 			vType := reflect.TypeOf(column.Dt)
@@ -249,7 +249,7 @@ func setJoins(joins map[string]string) func(db *gorm.DB) *gorm.DB {
 }
 
 //database func
-func filterGlobal(c Controller, columns map[int]Data, columnsType []*sql.ColumnType) func(db *gorm.DB) *gorm.DB {
+func filterGlobal(c Controller, columns []Data, columnsType []*sql.ColumnType) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 
 		globalSearch := ""
@@ -293,7 +293,7 @@ func filterGlobal(c Controller, columns map[int]Data, columnsType []*sql.ColumnT
 	}
 }
 
-func filterIndividual(c Controller, columns map[int]Data, columnsType []*sql.ColumnType) func(db *gorm.DB) *gorm.DB {
+func filterIndividual(c Controller, columns []Data, columnsType []*sql.ColumnType) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		// Individual column filtering
 		columnSearch := ""
@@ -338,7 +338,7 @@ func filterIndividual(c Controller, columns map[int]Data, columnsType []*sql.Col
 }
 
 //Refactor this
-func order(c Controller, columns map[int]Data) func(db *gorm.DB) *gorm.DB {
+func order(c Controller, columns []Data) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 
 		if c.GetString("order[0][column]") != "" {
@@ -410,7 +410,7 @@ func limit(c Controller) func(db *gorm.DB) *gorm.DB {
 	}
 }
 
-func search(column map[int]Data, keyColumnsI string) int {
+func search(column []Data, keyColumnsI string) int {
 	var i int
 	for i = 0; i < len(column); i++ {
 		data := column[i]
