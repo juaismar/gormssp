@@ -1350,7 +1350,7 @@ func SimpleFunctionTest(db *gorm.DB) {
 				columns := []ssp.Data{
 					ssp.Data{Db: "name", Dt: 0, Formatter: func(
 						data interface{}, row map[string]interface{}) (interface{}, error) {
-							return fmt.Sprintf("PREFIX_%v_%v", data, row["age"]), nil
+						return fmt.Sprintf("PREFIX_%v_%v", data, row["age"]), nil
 					}},
 				}
 				result, err := ssp.Simple(&c, db, "users", columns)
@@ -1596,4 +1596,36 @@ func Errors(db *gorm.DB) {
 			Expect(result.Data).To(Equal(testData))
 		})
 	})
+	Describe("Prevent SQL injection", func() {
+		It("no return error", func() {
+
+			mapa := make(map[string]string)
+			mapa["draw"] = "64"
+			mapa["start"] = "0"
+			mapa["length"] = "10"
+			mapa["order[0][column]"] = "0"
+			mapa["order[0][dir]"] = "asc"
+
+			mapa["columns[0][data]"] = "0"
+			mapa["columns[0][searchable]"] = "true"
+			mapa["columns[0][search][value]"] = "Juan`'"
+
+			c := ControllerEmulated{Params: mapa}
+
+			columns := []ssp.Data{
+				ssp.Data{Db: "name", Dt: 0, Formatter: nil},
+			}
+			result, err := ssp.Simple(&c, db, "users", columns)
+
+			Expect(err).To(BeNil())
+			Expect(result.Draw).To(Equal(64))
+			Expect(result.RecordsTotal).To(Equal(6))
+			Expect(result.RecordsFiltered).To(Equal(0))
+
+			testData := make([]interface{}, 0)
+
+			Expect(result.Data).To(Equal(testData))
+		})
+	})
+
 }

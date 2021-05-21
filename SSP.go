@@ -167,7 +167,7 @@ func dataOutput(columns []Data, rows *sql.Rows) ([]interface{}, error) {
 		for j := 0; j < len(columns); j++ {
 			column := columns[j]
 			var dt string
-			if column.Dt == nil{
+			if column.Dt == nil {
 				return nil, fmt.Errorf("Dt cannot be nil in column[%v]", j)
 			}
 
@@ -252,7 +252,6 @@ func setJoins(joins map[string]string) func(db *gorm.DB) *gorm.DB {
 func filterGlobal(c Controller, columns []Data, columnsType []*sql.ColumnType) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 
-		globalSearch := ""
 		str := c.GetString("search[value]")
 		//all columns filtering
 		if str != "" {
@@ -261,6 +260,7 @@ func filterGlobal(c Controller, columns []Data, columnsType []*sql.ColumnType) f
 				requestRegex = false
 			}
 			var i int
+			first := true
 			for i = 0; ; i++ {
 				keyColumnsI := fmt.Sprintf("columns[%d][data]", i)
 
@@ -275,13 +275,25 @@ func filterGlobal(c Controller, columns []Data, columnsType []*sql.ColumnType) f
 
 				if columnIdx > -1 && requestColumn == "true" {
 
-					query := bindingTypes(str, columnsType, columns[columnIdx], requestRegex)
-
-					if globalSearch != "" && query != "" {
-						globalSearch += " OR "
+					query, param := bindingTypes(str, columnsType, columns[columnIdx], requestRegex)
+					if query == "" {
+						continue
+					}
+					if first {
+						if param == "" {
+							db = db.Where(query)
+						} else {
+							db = db.Where(query, param)
+						}
+						first = false
+					} else {
+						if param == "" {
+							db = db.Or(query)
+						} else {
+							db = db.Or(query, param)
+						}
 					}
 
-					globalSearch += query
 				} else {
 					if columnIdx < 0 && requestColumn == "true" {
 						fmt.Printf("(002) Do you forgot searchable: false in column %v ? or wrong column name in client side\n (client field data: must be same than server side DT: field)\n", keyColumnsData)
@@ -289,14 +301,13 @@ func filterGlobal(c Controller, columns []Data, columnsType []*sql.ColumnType) f
 				}
 			}
 		}
-		return db.Where(globalSearch)
+		return db
 	}
 }
 
 func filterIndividual(c Controller, columns []Data, columnsType []*sql.ColumnType) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		// Individual column filtering
-		columnSearch := ""
 		var i int
 		for i = 0; ; i++ {
 			keyColumnsI := fmt.Sprintf("columns[%d][data]", i)
@@ -319,13 +330,15 @@ func filterIndividual(c Controller, columns []Data, columnsType []*sql.ColumnTyp
 				if err != nil {
 					requestRegex = false
 				}
-				query := bindingTypes(str, columnsType, columns[columnIdx], requestRegex)
-
-				if columnSearch != "" && query != "" {
-					columnSearch += " AND "
+				query, param := bindingTypes(str, columnsType, columns[columnIdx], requestRegex)
+				if query == "" {
+					continue
 				}
-
-				columnSearch += query
+				if param == "" {
+					db = db.Where(query)
+				} else {
+					db = db.Where(query, param)
+				}
 
 			} else {
 				if columnIdx < 0 && requestColumn == "true" {
@@ -333,7 +346,7 @@ func filterIndividual(c Controller, columns []Data, columnsType []*sql.ColumnTyp
 				}
 			}
 		}
-		return db.Where(columnSearch)
+		return db
 	}
 }
 
@@ -433,7 +446,7 @@ func search(column []Data, keyColumnsI string) int {
 }
 
 //check if searchable field is string
-func bindingTypes(value string, columnsType []*sql.ColumnType, column Data, isRegEx bool) string {
+func bindingTypes(value string, columnsType []*sql.ColumnType, column Data, isRegEx bool) (string, string) {
 	columndb := column.Db
 	for _, columnInfo := range columnsType {
 		if columnInfo.Name() == columndb {
@@ -447,10 +460,10 @@ func bindingTypes(value string, columnsType []*sql.ColumnType, column Data, isRe
 		}
 	}
 
-	return ""
+	return "", ""
 }
 
-func bindingTypesQuery(searching, columndb, value string, columnInfo *sql.ColumnType, isRegEx bool, column Data) string {
+func bindingTypesQuery(searching, columndb, value string, columnInfo *sql.ColumnType, isRegEx bool, column Data) (string, string) {
 	switch searching {
 	case "string", "TEXT", "varchar", "VARCHAR":
 		if isRegEx {
@@ -458,55 +471,55 @@ func bindingTypesQuery(searching, columndb, value string, columnInfo *sql.Column
 		}
 
 		if column.Cs {
-			return fmt.Sprintf("%s LIKE '%s'", columndb, "%"+value+"%")
+			return fmt.Sprintf("%s LIKE ?", columndb), "%" + value + "%"
 		}
-		return fmt.Sprintf("Lower(%s) LIKE '%s'", columndb, "%"+strings.ToLower(value)+"%")
+		return fmt.Sprintf("Lower(%s) LIKE ?", columndb), "%" + strings.ToLower(value) + "%"
 	case "UUID", "blob":
 		if isRegEx {
 			return regExp(fmt.Sprintf("CAST(%s AS TEXT)", columndb), value)
 		}
-		return fmt.Sprintf("%s = '%s'", columndb, value)
+		return fmt.Sprintf("%s = ?", columndb), value
 	case "int32", "INT4", "INT8", "integer", "INTEGER", "bigint":
 		if isRegEx {
 			return regExp(fmt.Sprintf("CAST(%s AS TEXT)", columndb), value)
 		}
-		intval, err := strconv.Atoi(value)
+		_, err := strconv.Atoi(value)
 		if err != nil {
-			return ""
+			return "", ""
 		}
-		return fmt.Sprintf("%s = %d", columndb, intval)
+		return fmt.Sprintf("%s = ?", columndb), value
 	case "bool", "BOOL":
 		boolval, err := strconv.ParseBool(value)
 		queryval := "NOT"
 		if err == nil && boolval {
 			queryval = ""
 		}
-		return fmt.Sprintf("%s IS %s TRUE", columndb, queryval)
+		return fmt.Sprintf("%s IS %s TRUE", columndb, queryval), ""
 	case "real", "NUMERIC":
 		if isRegEx {
 			return regExp(fmt.Sprintf("CAST(%s AS TEXT)", columndb), value)
 		}
 		fmt.Print("(005) GORMSSP WARNING: Serarching float values, float cannot be exactly equal\n")
-		float64val, err := strconv.ParseFloat(value, 64)
+		_, err := strconv.ParseFloat(value, 64)
 		if err != nil {
-			return ""
+			return "", ""
 		}
-		return fmt.Sprintf("%s = %f", columndb, float64val)
+		return fmt.Sprintf("%s = ?", columndb), value
 	default:
 		fmt.Printf("(004) GORMSSP New type %v\n", columnInfo.DatabaseTypeName())
-		return ""
+		return "", ""
 	}
 }
 
-func regExp(columndb, value string) string {
+func regExp(columndb, value string) (string, string) {
 	switch dialect {
 	case "sqlite3":
 		//TODO make regexp
-		return fmt.Sprintf("Lower(%s) LIKE '%s'", columndb, "%"+strings.ToLower(value)+"%")
+		return fmt.Sprintf("Lower(%s) LIKE '%s'", columndb, "%"+strings.ToLower(value)+"%"), ""
 	case "postgres":
-		return fmt.Sprintf("%s ~* '%s'", columndb, value)
+		return fmt.Sprintf("%s ~* '%s'", columndb, value), ""
 	default:
-		return fmt.Sprintf("%s ~* '%s'", columndb, value)
+		return fmt.Sprintf("%s ~* '%s'", columndb, value), ""
 	}
 }
 
