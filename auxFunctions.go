@@ -4,6 +4,7 @@ import (
 	"strings"
 )
 
+// Skip reserved words
 func CheckReserved(columnName string) string {
 	if isReserved(columnName) {
 		return "\"" + columnName + "\""
