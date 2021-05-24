@@ -23,6 +23,22 @@ func (c *ControllerEmulated) GetString(key string, def ...string) string {
 
 // FunctionsTest internal function test
 func FunctionsTest() {
+	Describe("DrawNumber", func() {
+		It("returns 64", func() {
+			mapa := make(map[string]string)
+			mapa["draw"] = "64"
+			c := ControllerEmulated{Params: mapa}
+
+			Expect(64).To(Equal(ssp.DrawNumber(&c)))
+		})
+		It("returns 0", func() {
+			mapa := make(map[string]string)
+			mapa["draw"] = "hola"
+			c := ControllerEmulated{Params: mapa}
+
+			Expect(0).To(Equal(ssp.DrawNumber(&c)))
+		})
+	})
 	Describe("flated", func() {
 		It("returns Empty", func() {
 
@@ -1132,6 +1148,54 @@ func SimpleFunctionTest(db *gorm.DB) {
 				row["0"] = "JuAn"
 				row["1"] = "Trompeta"
 				row["2"] = int64(15)
+				testData = append(testData, row)
+
+				Expect(result.Data).To(Equal(testData))
+			})
+			It("returns all fun (to test db.Or(query))", func() {
+
+				mapa := make(map[string]string)
+				mapa["draw"] = "64"
+				mapa["start"] = "0"
+				mapa["length"] = "10"
+				mapa["order[0][column]"] = "0"
+				mapa["order[0][dir]"] = "asc"
+
+				mapa["search[value]"] = "true"
+
+				mapa["columns[0][data]"] = "0"
+				mapa["columns[0][searchable]"] = "true"
+				mapa["columns[0][search][value]"] = ""
+
+				mapa["columns[1][data]"] = "1"
+				mapa["columns[1][searchable]"] = "true"
+				mapa["columns[1][search][value]"] = ""
+
+				c := ControllerEmulated{Params: mapa}
+
+				columns := []ssp.Data{
+					ssp.Data{Db: "name", Dt: 0, Formatter: nil},
+					ssp.Data{Db: "fun", Dt: 1, Formatter: nil},
+				}
+				result, err := ssp.Simple(&c, db, "users", columns)
+
+				Expect(err).To(BeNil())
+				Expect(result.Draw).To(Equal(64))
+				Expect(result.RecordsTotal).To(Equal(6))
+				Expect(result.RecordsFiltered).To(Equal(3))
+
+				testData := make([]interface{}, 0)
+				row := make(map[string]interface{})
+				row["0"] = "Juan"
+				row["1"] = true
+				testData = append(testData, row)
+				row = make(map[string]interface{})
+				row["0"] = "Joaquin"
+				row["1"] = true
+				testData = append(testData, row)
+				row = make(map[string]interface{})
+				row["0"] = "Laura"
+				row["1"] = true
 				testData = append(testData, row)
 
 				Expect(result.Data).To(Equal(testData))
