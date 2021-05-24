@@ -41,7 +41,7 @@ func Simple(c Controller, conn *gorm.DB,
 
 	dialect = conn.Dialect().GetName()
 
-	responseJSON.Draw = drawNumber(c)
+	responseJSON.Draw = DrawNumber(c)
 	dbConfig(conn)
 
 	columnsType, err := initBinding(conn, "*", table, make(map[string]string, 0))
@@ -90,7 +90,7 @@ func Complex(c Controller, conn *gorm.DB, table string, columns []Data,
 
 	dialect = conn.Dialect().GetName()
 
-	responseJSON.Draw = drawNumber(c)
+	responseJSON.Draw = DrawNumber(c)
 	dbConfig(conn)
 
 	// Build the SQL query string from the request
@@ -197,14 +197,6 @@ func dataOutput(columns []Data, rows *sql.Rows) ([]interface{}, error) {
 	return out, nil
 }
 
-func drawNumber(c Controller) int {
-	draw, err := strconv.Atoi(c.GetString("draw"))
-	if err != nil {
-		return 0
-	}
-	return draw
-}
-
 func flated(whereArray []string) string {
 	query := ""
 	for _, where := range whereArray {
@@ -248,56 +240,69 @@ func setJoins(joins map[string]string) func(db *gorm.DB) *gorm.DB {
 	}
 }
 
+func setQuery(db *gorm.DB, query, param, logic string) *gorm.DB {
+	if logic == "where" {
+		if param == "" {
+			db = db.Where(query)
+		} else {
+			db = db.Where(query, param)
+		}
+	} else {
+		if param == "" {
+			db = db.Or(query)
+		} else {
+			db = db.Or(query, param)
+		}
+	}
+
+	return db
+}
+
+func setGlobalQuery(db *gorm.DB, query, param string, first bool) *gorm.DB {
+	logic := "or"
+	if first {
+		logic = "where"
+	}
+	return setQuery(db, query, param, logic)
+}
+
 //database func
 func filterGlobal(c Controller, columns []Data, columnsType []*sql.ColumnType) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 
 		str := c.GetString("search[value]")
+		if str == "" {
+			return db
+		}
+		requestRegex := ParamToBool(c, "search[regex]")
+
 		//all columns filtering
-		if str != "" {
-			requestRegex, err := strconv.ParseBool(c.GetString("search[regex]"))
-			if err != nil {
-				requestRegex = false
+		var i int
+		first := true
+		for i = 0; ; i++ {
+			keyColumnsI := fmt.Sprintf("columns[%d][data]", i)
+
+			keyColumnsData := c.GetString(keyColumnsI)
+			if keyColumnsData == "" {
+				break
 			}
-			var i int
-			first := true
-			for i = 0; ; i++ {
-				keyColumnsI := fmt.Sprintf("columns[%d][data]", i)
+			columnIdx := search(columns, keyColumnsData)
 
-				keyColumnsData := c.GetString(keyColumnsI)
-				if keyColumnsData == "" {
-					break
+			requestColumnQuery := fmt.Sprintf("columns[%d][searchable]", i)
+			requestColumn := c.GetString(requestColumnQuery)
+
+			if columnIdx > -1 && requestColumn == "true" {
+
+				query, param := bindingTypes(str, columnsType, columns[columnIdx], requestRegex)
+				if query == "" {
+					continue
 				}
-				columnIdx := search(columns, keyColumnsData)
+				db = setGlobalQuery(db, query, param, first)
+				first = false
 
-				requestColumnQuery := fmt.Sprintf("columns[%d][searchable]", i)
-				requestColumn := c.GetString(requestColumnQuery)
-
-				if columnIdx > -1 && requestColumn == "true" {
-
-					query, param := bindingTypes(str, columnsType, columns[columnIdx], requestRegex)
-					if query == "" {
-						continue
-					}
-					if first {
-						if param == "" {
-							db = db.Where(query)
-						} else {
-							db = db.Where(query, param)
-						}
-						first = false
-					} else {
-						if param == "" {
-							db = db.Or(query)
-						} else {
-							db = db.Or(query, param)
-						}
-					}
-
-				} else {
-					if columnIdx < 0 && requestColumn == "true" {
-						fmt.Printf("(002) Do you forgot searchable: false in column %v ? or wrong column name in client side\n (client field data: must be same than server side DT: field)\n", keyColumnsData)
-					}
+			} else {
+				if columnIdx < 0 && requestColumn == "true" {
+					fmt.Printf("(002) Do you forgot searchable: false in column %v ? or wrong column name in client side\n (client field data: must be same than server side DT: field)\n", keyColumnsData)
 				}
 			}
 		}
@@ -326,19 +331,12 @@ func filterIndividual(c Controller, columns []Data, columnsType []*sql.ColumnTyp
 			str := c.GetString(requestColumnQuery)
 			if columnIdx > -1 && requestColumn == "true" && str != "" {
 				requestRegexQuery := fmt.Sprintf("columns[%d][search][regex]", i)
-				requestRegex, err := strconv.ParseBool(c.GetString(requestRegexQuery))
-				if err != nil {
-					requestRegex = false
-				}
+				requestRegex := ParamToBool(c, requestRegexQuery)
 				query, param := bindingTypes(str, columnsType, columns[columnIdx], requestRegex)
 				if query == "" {
 					continue
 				}
-				if param == "" {
-					db = db.Where(query)
-				} else {
-					db = db.Where(query, param)
-				}
+				db = setQuery(db, query, param, "where")
 
 			} else {
 				if columnIdx < 0 && requestColumn == "true" {

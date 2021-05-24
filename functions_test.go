@@ -1627,5 +1627,4 @@ func Errors(db *gorm.DB) {
 			Expect(result.Data).To(Equal(testData))
 		})
 	})
-
 }
