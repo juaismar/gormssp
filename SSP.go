@@ -547,7 +547,7 @@ func getFields(rows *sql.Rows) (map[string]interface{}, error) {
 		key := columns[i]
 		val := *(current[i]).(*interface{})
 		if val == nil {
-			value[key] = nil
+			value[key] = val
 			continue
 		}
 		vType := reflect.TypeOf(val)
@@ -601,6 +601,8 @@ func getFieldsSearch(searching, key string, val interface{}, vType reflect.Type)
 		default:
 			return val, nil
 		}
+	case "BYTEA":
+		return val.([]byte), nil
 	default:
 		fmt.Printf("(006) GORMSSP New type: %v for key: %v\n", searching, key)
 		return val, nil
