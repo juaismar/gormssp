@@ -1350,7 +1350,7 @@ func SimpleFunctionTest(db *gorm.DB) {
 				columns := []ssp.Data{
 					ssp.Data{Db: "name", Dt: 0, Formatter: func(
 						data interface{}, row map[string]interface{}) (interface{}, error) {
-							return fmt.Sprintf("PREFIX_%v_%v", data, row["age"]), nil
+						return fmt.Sprintf("PREFIX_%v_%v", data, row["age"]), nil
 					}},
 				}
 				result, err := ssp.Simple(&c, db, "users", columns)

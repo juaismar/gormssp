@@ -24,6 +24,7 @@ type User struct {
 	Bitcoins   float64
 	Toys       int64
 	End        int
+	Secret     []byte
 }
 
 // GetDefaultData returns data to populate table
