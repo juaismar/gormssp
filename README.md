@@ -12,6 +12,8 @@ _Using Datatables pagination with golang_
 
 ### Pre-requisites 📋
 
+This is for old gorm, for the new gorm (https://github.com/go-gorm/gorm) use this https://github.com/juaismar/go-gormssp
+
 Database compatible: Postgres (stable), SQLite (without REGEXP)
 
 * Obviously use it in a golang project
