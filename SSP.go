@@ -513,11 +513,11 @@ func regExp(columndb, value string) (string, string) {
 	switch dialect {
 	case "sqlite3":
 		//TODO make regexp
-		return fmt.Sprintf("Lower(%s) LIKE '%s'", columndb, "%"+strings.ToLower(value)+"%"), ""
+		return fmt.Sprintf("Lower(%s) LIKE ?", columndb), "%" + strings.ToLower(value) + "%"
 	case "postgres":
-		return fmt.Sprintf("%s ~* '%s'", columndb, value), ""
+		return fmt.Sprintf("%s ~* ?", columndb), value
 	default:
-		return fmt.Sprintf("%s ~* '%s'", columndb, value), ""
+		return fmt.Sprintf("%s ~* ?", columndb), value
 	}
 }
 
