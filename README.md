@@ -39,7 +39,9 @@ A working example on https://github.com/juaismar/GormSSP_Example
 
 -This is a simple code that sends data to the Datatables JS client.
 ```
-import ("github.com/juaismar/gormssp/v2")
+import (
+	SSP "github.com/juaismar/gormssp/v2"
+)
 
 func (c *User) Pagination() {
 
@@ -49,9 +51,9 @@ func (c *User) Pagination() {
   // indexes but can be a string
   // Formatter is a function to customize the value of field , can be nil.
   columns := []SSP.Data{
-    SSP.Data{Db: "name", Dt: 0, Formatter: nil},
-    SSP.Data{Db: "role", Dt: 1, Formatter: nil},
-    SSP.Data{Db: "email", Dt: 2, Formatter: nil},
+    {Db: "name", Dt: 0, Formatter: nil},
+    {Db: "role", Dt: 1, Formatter: nil},
+    {Db: "email", Dt: 2, Formatter: nil},
   }
 
   // Send the data to the client
@@ -79,7 +81,7 @@ import ("github.com/juaismar/gormssp/v2")
 
 func (c *User) Pagination() {
     columns := []SSP.Data{
-      SSP.Data{Db: "id", Dt: "id", Formatter: nil},
+      {Db: "id", Dt: "id", Formatter: nil},
     }
     //whereResult is a WHERE condition to apply to the result set
     //whereAll is a WHERE condition to apply to all queries
