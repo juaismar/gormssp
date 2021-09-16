@@ -13,7 +13,7 @@ type Pet struct {
 	Name     string
 }
 
-// GetDefaultData returns data to populate table
+// GetDefaultPet returns data to populate table
 func GetDefaultPet() []Pet {
 
 	uuidJuan, _ := uuid.FromString("bfe44cb2-c65c-4f37-9672-8437b6718d70")

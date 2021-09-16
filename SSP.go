@@ -13,6 +13,9 @@ import (
 
 var dialect = ""
 
+const asc = "asc NULLS FIRST"
+const desc = "desc NULLS LAST"
+
 // Data is a line in map that link the database field with datatable field
 type Data struct {
 	Db        string                                                                  //name of column
@@ -374,9 +377,9 @@ func order(c Controller, columns []Data) func(db *gorm.DB) *gorm.DB {
 					columnIdxTittle = fmt.Sprintf("order[%d][dir]", i)
 					requestColumnData = c.GetString(columnIdxTittle)
 
-					order := "desc NULLS LAST"
+					order := "desc" //IS NULL" // NULLS LAST"
 					if requestColumnData == "asc" {
-						order = "asc NULLS FIRST"
+						order = "asc" //IS NULL" // NULLS FIRST"
 					}
 
 					order = checkOrderDialect(order)
@@ -396,12 +399,15 @@ func order(c Controller, columns []Data) func(db *gorm.DB) *gorm.DB {
 func checkOrderDialect(order string) string {
 	if dialect == "sqlite3" {
 		if order == "asc" {
-			return "desc"
+			return desc
 		}
-		return "asc"
+		return asc
 	}
 
-	return order
+	if order == "asc" {
+		return asc
+	}
+	return desc
 }
 
 func limit(c Controller) func(db *gorm.DB) *gorm.DB {
