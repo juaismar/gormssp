@@ -374,9 +374,9 @@ func order(c Controller, columns []Data) func(db *gorm.DB) *gorm.DB {
 					columnIdxTittle = fmt.Sprintf("order[%d][dir]", i)
 					requestColumnData = c.GetString(columnIdxTittle)
 
-					order := "desc"
+					order := "desc NULLS LAST"
 					if requestColumnData == "asc" {
-						order = "asc"
+						order = "asc NULLS FIRST"
 					}
 
 					order = checkOrderDialect(order)
