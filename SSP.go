@@ -124,8 +124,10 @@ func Complex(c Controller, conn *gorm.DB, table string, columns []Data,
 	if err != nil {
 		return
 	}
+	defer rows.Close()
 
 	responseJSON.Data, err = dataOutput(columns, rows)
+	rows.Close()
 	if err != nil {
 		return
 	}
@@ -152,7 +154,6 @@ func Complex(c Controller, conn *gorm.DB, table string, columns []Data,
 		return
 	}
 
-	defer rows.Close()
 	return
 }
 
