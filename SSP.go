@@ -467,10 +467,21 @@ func bindingTypes(value string, columnsType []*sql.ColumnType, column Data, isRe
 
 	return "", ""
 }
+func clearSearching(searching string) string {
+	tipeElement := strings.ToLower(searching)
 
+	switch {
+	case strings.Contains(tipeElement, "varchar"):
+		return "varchar"
+	case strings.Contains(tipeElement, "int"):
+		return "int"
+	default:
+		return searching
+	}
+}
 func bindingTypesQuery(searching, columndb, value string, columnInfo *sql.ColumnType, isRegEx bool, column Data) (string, string) {
-	switch searching {
-	case "string", "TEXT", "varchar", "VARCHAR":
+	switch clearSearching(searching) {
+	case "string", "TEXT", "varchar", "text":
 		if isRegEx {
 			return regExp(columndb, value)
 		}
@@ -484,7 +495,7 @@ func bindingTypesQuery(searching, columndb, value string, columnInfo *sql.Column
 			return regExp(fmt.Sprintf("CAST(%s AS TEXT)", columndb), value)
 		}
 		return fmt.Sprintf("%s = ?", columndb), value
-	case "int32", "INT4", "INT8", "integer", "INTEGER", "bigint":
+	case "int":
 		if isRegEx {
 			return regExp(fmt.Sprintf("CAST(%s AS TEXT)", columndb), value)
 		}
@@ -572,11 +583,10 @@ func getFields(rows *sql.Rows) (map[string]interface{}, error) {
 }
 
 func getFieldsSearch(searching, key string, val interface{}, vType reflect.Type) (interface{}, error) {
-	switch searching {
-
-	case "string", "TEXT", "varchar", "VARCHAR":
+	switch clearSearching(searching) {
+	case "string", "TEXT", "varchar", "text":
 		return val.(string), nil
-	case "int32", "INT4", "INT8", "integer", "bigint", "INTEGER":
+	case "int":
 		return val.(int64), nil
 	case "NUMERIC", "real":
 		switch vType.String() {
