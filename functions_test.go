@@ -1441,6 +1441,46 @@ func SimpleFunctionTest(db *gorm.DB) {
 				Expect(result.Data).To(Equal(testData))
 			})
 		})
+		Describe("Field with space", func() {
+			It("return favorite song ", func() {
+
+				mapa := make(map[string]string)
+				mapa["draw"] = "64"
+				mapa["start"] = "0"
+				mapa["length"] = "10"
+				mapa["order[0][column]"] = "0"
+				mapa["order[0][dir]"] = "asc"
+
+				mapa["columns[0][data]"] = "0"
+				mapa["columns[0][searchable]"] = "true"
+				mapa["columns[0][search][value]"] = ""
+
+				mapa["columns[1][data]"] = "1"
+				mapa["columns[1][searchable]"] = "true"
+				mapa["columns[1][search][value]"] = "Español"
+
+				c := ControllerEmulated{Params: mapa}
+
+				columns := []ssp.Data{
+					{Db: "name", Dt: 0, Formatter: nil},
+					{Db: "\"Favorite song\"", Dt: 1, Formatter: nil},
+				}
+				result, err := ssp.Simple(&c, db, "users", columns)
+
+				Expect(err).To(BeNil())
+				Expect(result.Draw).To(Equal(64))
+				Expect(result.RecordsTotal).To(Equal(6))
+				Expect(result.RecordsFiltered).To(Equal(1))
+
+				testData := make([]interface{}, 0)
+				row := make(map[string]interface{})
+				row["0"] = "JuAn"
+				row["1"] = "Himno Español"
+				testData = append(testData, row)
+
+				Expect(result.Data).To(Equal(testData))
+			})
+		})
 		It("Ordering by instrument asc", func() {
 
 			mapa := make(map[string]string)
