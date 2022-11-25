@@ -270,7 +270,7 @@ func setGlobalQuery(db *gorm.DB, query, param string, first bool) *gorm.DB {
 	return setQuery(db, query, param, logic)
 }
 
-//database func
+// database func
 func filterGlobal(c Controller, columns []Data, columnsType []*sql.ColumnType) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 
@@ -352,7 +352,7 @@ func filterIndividual(c Controller, columns []Data, columnsType []*sql.ColumnTyp
 	}
 }
 
-//Refactor this
+// Refactor this
 func order(c Controller, columns []Data) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 
@@ -398,7 +398,7 @@ func order(c Controller, columns []Data) func(db *gorm.DB) *gorm.DB {
 	}
 }
 func checkOrderDialect(order string) string {
-	if dialect == "sqlite3" {
+	if isSQLite(dialect) {
 		if order == "asc" {
 			return desc
 		}
@@ -450,7 +450,7 @@ func search(column []Data, keyColumnsI string) int {
 	return -1
 }
 
-//check if searchable field is string
+// check if searchable field is string
 func bindingTypes(value string, columnsType []*sql.ColumnType, column Data, isRegEx bool) (string, string) {
 	columndb := column.Db
 	for _, columnInfo := range columnsType {
@@ -518,7 +518,7 @@ func bindingTypesQuery(searching, columndb, value string, columnInfo *sql.Column
 
 func regExp(columndb, value string) (string, string) {
 	switch dialect {
-	case "sqlite3":
+	case "sqlite3", "sqlite":
 		//TODO make regexp
 		return fmt.Sprintf("Lower(%s) LIKE ?", columndb), "%" + strings.ToLower(value) + "%"
 	case "postgres":
@@ -649,7 +649,12 @@ func initBinding(db *gorm.DB, selectQuery, table string, whereJoin map[string]st
 }
 
 func dbConfig(conn *gorm.DB) {
-	if dialect == "sqlite3" {
+	if isSQLite(dialect) {
 		conn.Exec("PRAGMA case_sensitive_like = ON;")
 	}
+}
+
+func isSQLite(dialectName string) bool {
+	return dialectName == "sqlite" ||
+		dialectName == "sqlite3"
 }
