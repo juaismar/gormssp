@@ -95,6 +95,11 @@ func (c *User) Pagination() {
 }
 ```
 
+-Tables with spaces in the name or styart whit numbers must be between \".
+```
+SSP.Data{Db: "\"1My special table\"", Dt: 3, Formatter: nil}
+```
+
 -This project is based in the PHP version of datatables pagination in https://datatables.net/examples/data_sources/server_side
 -Original file can be found in https://github.com/DataTables/DataTables/blob/master/examples/server_side/scripts/ssp.class.php
 
