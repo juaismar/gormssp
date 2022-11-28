@@ -579,7 +579,12 @@ func getFieldsSearch(searching, key string, val interface{}, vType reflect.Type)
 	case "string", "TEXT", "varchar", "text":
 		return val.(string), nil
 	case "int":
-		return val.(int64), nil
+		switch vType.String() {
+		case "string":
+			return val.(string), nil
+		default:
+			return val.(int64), nil
+		}
 	case "NUMERIC", "real":
 		switch vType.String() {
 		case "[]uint8":
