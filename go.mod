@@ -8,7 +8,8 @@ require (
 	github.com/gordonklaus/ineffassign v0.0.0-20201107091007-3b93a8888063 // indirect
 	github.com/jinzhu/gorm v1.9.16
 	github.com/lib/pq v1.8.0
-	github.com/mattn/go-sqlite3 v2.0.1+incompatible // indirect
+	//github.com/mattn/go-sqlite3 must be 1.14, explained in lib readme
+	github.com/mattn/go-sqlite3 v1.14.16
 	github.com/nxadm/tail v1.4.5 // indirect
 	github.com/onsi/ginkgo v1.14.2
 	github.com/onsi/gomega v1.10.3
