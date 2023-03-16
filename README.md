@@ -100,6 +100,15 @@ func (c *User) Pagination() {
 SSP.Data{Db: "\"1My special table\"", Dt: 3, Formatter: nil}
 ```
 
+-Can implement functions in search, example:accent insensitive search 
+```
+SELECT * FROM users WHERE f_unaccent(name) LIKE '%maria%';.
+```
+can be implemented as:
+```
+SSP.Data{Db: "name", Dt: 2, Formatter: nil, Sf: "f_unaccent(name)"}
+```
+
 -This project is based in the PHP version of datatables pagination in https://datatables.net/examples/data_sources/server_side
 -Original file can be found in https://github.com/DataTables/DataTables/blob/master/examples/server_side/scripts/ssp.class.php
 
